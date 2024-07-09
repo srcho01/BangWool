@@ -1,9 +1,6 @@
 package Backend.BangWool.exception;
 
-import Backend.BangWool.util.CustomResponse;
-import Backend.BangWool.util.ResponseUtil;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import Backend.BangWool.response.StatusResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,26 +9,26 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<CustomResponse> handleBadRequestHandler(BadRequestException e) {
-        return ResponseUtil.build(HttpStatus.BAD_REQUEST, e.getMessage());
+    public StatusResponse handleBadRequestHandler(BadRequestException e) {
+        return StatusResponse.build(400, e);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<CustomResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    public StatusResponse handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
         String errorMessage = e.getBindingResult().getAllErrors().isEmpty() ?
                 "Invalid arguments" :
                 e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
-        return ResponseUtil.build(HttpStatus.BAD_REQUEST, errorMessage);
+        return StatusResponse.build(400, errorMessage);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<CustomResponse> handleNotFoundHandler(NotFoundException e) {
-        return ResponseUtil.build(HttpStatus.NOT_FOUND, e.getMessage());
+    public StatusResponse handleNotFoundHandler(NotFoundException e) {
+        return StatusResponse.build(404, e);
     }
 
     @ExceptionHandler(ServerException.class)
-    public ResponseEntity<CustomResponse> handleServerHandler(ServerException e) {
-        return ResponseUtil.build(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    public StatusResponse handleServerHandler(ServerException e) {
+        return StatusResponse.build(500, e);
     }
 
 }
