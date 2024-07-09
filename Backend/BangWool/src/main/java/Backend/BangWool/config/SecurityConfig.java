@@ -17,25 +17,11 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    // @Bean
-    // public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    //     http
-    //             .authorizeHttpRequests((auth) -> auth
-    //                     .requestMatchers("/", "/login", "/register").permitAll()
-    //                     .anyRequest().authenticated()
-    //             );
-    //
-    //     http
-    //             .csrf(AbstractHttpConfigurer::disable);
-    //
-    //     return http.build();
-    // }
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/", "/email/**").permitAll()
+                        .requestMatchers("/test/**", "/v1/email/**", "/api-docs/**", "/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
