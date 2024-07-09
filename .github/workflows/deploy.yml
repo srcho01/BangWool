@@ -1,0 +1,78 @@
+name: Java CI/CD with Gradle
+
+on:
+  push:
+    branches: [ "backend" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Backend/BangWool
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Init Gradle 
+      uses: gradle/gradle-build-action@v2
+      with:
+        gradle-version: 8.5
+    
+    - uses: actions/checkout@v4
+    - run: touch ./src/main/resources/application.properties
+    - run: echo "${{secrets.APPLICATION}}" > ./src/main/resources/application.properties
+    - uses: actions/upload-artifact@v2
+      with:
+        name: application.properties
+        path: ./src/main/resources/application.properties
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew clean build --exclude-task test
+    
+    - name: Make Directory
+      run: mkdir -p deploy
+        
+    - name: Copy Jar
+      run: cp ./build/libs/*.jar ./deploy
+    
+    - name: Copy appspec.yml
+      run: cp appspec.yml ./deploy
+
+    - name: Copy script
+      run: cp ./scripts/*.sh ./deploy
+
+    - name: Grant execute permission for deploy.sh
+      run: chmod +x ./deploy/deploy.sh
+
+    - name: Make zip file
+      run: zip -r ./bangwool.zip ./deploy
+      shell: bash
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+
+    - name: Upload to S3
+      run: aws s3 cp --region ap-northeast-2 ./bangwool.zip s3://bangwool-deploy/
+
+    # Deploy
+    - name: Deploy
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      run: aws deploy create-deployment --application-name bangwool --deployment-group-name bangwool-group --file-exists-behavior OVERWRITE --s3-location bucket=bangwool-deploy,bundleType=zip,key=bangwool.zip --region ap-northeast-2
