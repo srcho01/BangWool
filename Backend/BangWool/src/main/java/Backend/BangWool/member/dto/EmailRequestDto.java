@@ -9,10 +9,10 @@ import lombok.Setter;
 @Schema(description = "Email Request DTO")
 @Getter
 @Setter
-public class EmailDTO {
+public class EmailRequestDto {
 
     @Schema(example = "test@gmail.com")
-    @Email(message = "Email is out build form")
+    @Email(message = "Email is out form")
     @NotEmpty(message = "Email is required")
     private String email;
 
