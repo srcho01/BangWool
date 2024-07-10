@@ -31,7 +31,9 @@ public class SignUpService {
         passwordCheck(data.getPassword1(), data.getPassword2());
 
         // nickname 체크
-        nicknameCheck(data.getNickname());
+        boolean isNicknameCheck = nicknameCheck(data.getNickname());
+        if (!isNicknameCheck)
+            throw new BadRequestException("Nickname is already existed.");
 
         // Check email verification
         String isVerify = redisUtil.getData(GlobalConstant.REDIS_EMAIL_VERIFY + data.getEmail());
@@ -70,10 +72,10 @@ public class SignUpService {
 
     }
 
-    private void nicknameCheck(String nickname) {
+    public boolean nicknameCheck(String nickname) {
 
-        if (memberRepository.existsByNickname(nickname))
-            throw new BadRequestException("Nickname is already registered.");
+        if (nickname == null || nickname.isEmpty())
+            throw new BadRequestException("Nickname is empty.");
 
         String regex = "^[가-힣a-zA-Z0-9]{1,10}$";
         Pattern pattern = Pattern.compile(regex);
@@ -81,5 +83,7 @@ public class SignUpService {
 
         if (!matcher.matches())
             throw new BadRequestException("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
+
+        return !memberRepository.existsByNickname(nickname);
     }
 }
