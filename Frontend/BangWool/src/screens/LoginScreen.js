@@ -12,6 +12,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <ImageBackground source={require('../../assets/images/l_default.png')} style={styles.background}>
+      <Text style={styles.com}>방울</Text>
       <Text style={styles.title}>로그인</Text>
       <View style={styles.container}>
         
@@ -78,10 +79,18 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'rgba(232, 232, 232, 0.8)',
   },
+  com: {
+    position: 'absolute',
+    top: 16,
+    right: 16, 
+    fontSize: 24,
+    fontFamily: 'KCC-Hanbit',
+  },
   title: {
     fontSize: 24,
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: 'left', 
+    marginLeft: 20, 
   },
   inputContainer: {
     marginBottom: 12,
