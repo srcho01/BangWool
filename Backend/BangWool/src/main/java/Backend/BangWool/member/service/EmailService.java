@@ -1,6 +1,7 @@
 package Backend.BangWool.member.service;
 
 import Backend.BangWool.exception.ServerException;
+import Backend.BangWool.util.GlobalConstant;
 import Backend.BangWool.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.transaction.Transactional;
@@ -18,7 +19,6 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final RedisUtil redis;
-    private final String emailPrefix = "EMAIL:";
 
     private String createCode() {
         Random r = new Random();
@@ -51,7 +51,7 @@ public class EmailService {
                     "</body>" +
                 "</html>";
 
-        redis.setDataExpire(emailPrefix + email, code, 600); // 10minutes
+        redis.setDataExpire(GlobalConstant.REDIS_EMAIL_CODE + email, code, 600); // 10minutes
 
         try {
             helper.setTo(email);
@@ -61,14 +61,20 @@ public class EmailService {
             mailSender.send(message);
 
         } catch (Exception e) {
-            redis.deleteData(emailPrefix + email);
+            redis.deleteData(GlobalConstant.REDIS_EMAIL_CODE + email);
             throw new ServerException("Failed to send authentication email");
         }
     }
 
     public boolean checkCode(String email, String code) {
-        String codeInRedis = redis.getData(emailPrefix + email);
-        return codeInRedis != null && codeInRedis.equals(code);
+        String codeInRedis = redis.getData(GlobalConstant.REDIS_EMAIL_CODE + email);
+
+        if (codeInRedis != null && codeInRedis.equals(code)) {
+            redis.deleteData(GlobalConstant.REDIS_EMAIL_CODE + email);
+            redis.setDataExpire(GlobalConstant.REDIS_EMAIL_VERIFY + email, "true", 1800); // 30minutes
+            return true;
+        }
+        return false;
     }
 
 }
