@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isChecked, setIsChecked] = useState(false);
 
   const handleLogin = () => {
     // 로그인 로직 추가
     console.log('Login button pressed');
+  };
+
+  const toggleCheckbox = () => {
+    setIsChecked(!isChecked);
   };
 
   return (
@@ -15,7 +21,6 @@ const LoginScreen = ({ navigation }) => {
       <Text style={styles.com}>방울</Text>
       <Text style={styles.title}>로그인</Text>
       <View style={styles.container}>
-        
         
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>이메일</Text>
@@ -41,9 +46,9 @@ const LoginScreen = ({ navigation }) => {
         </View>
         
         <View style={styles.checkboxContainer}>
-          <TouchableOpacity onPress={() => { /* checkbox toggle 로직 추가 */ }}>
-            <View style={styles.checkbox}>
-              {/* 체크박스 상태에 따라 스타일 변경 가능 */}
+          <TouchableOpacity onPress={toggleCheckbox}>
+            <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+              {isChecked && <Icon name="check" size={16} color="white" />}
             </View>
           </TouchableOpacity>
           <Text style={styles.checkboxLabel}>로그인 유지하기</Text>
@@ -123,7 +128,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderColor: 'gray',
     backgroundColor: 'rgb(253, 253, 253)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: 8,
+  },
+  checkboxChecked: {
+    backgroundColor: 'rgb(91, 115, 133)',
   },
   checkboxLabel: {
     fontSize: 14,
@@ -144,7 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   footer: {
-    flexDirection: 'colunm',
+    flexDirection: 'column',
     alignItems: 'center',
     marginTop: 12,
   },
