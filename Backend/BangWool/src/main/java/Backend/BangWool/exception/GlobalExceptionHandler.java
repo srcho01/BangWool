@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return StatusResponse.build(500, e);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public StatusResponse handleRuntime(RuntimeException e) {
+        return StatusResponse.build(500, e);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public StatusResponse handleMessageNotReadable(HttpMessageNotReadableException e) {
         return StatusResponse.build(400, "Message format is incorrect.");
