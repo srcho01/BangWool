@@ -4,7 +4,7 @@ import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.LocalSignUpRequestDto;
 import Backend.BangWool.member.repository.MemberRepository;
-import Backend.BangWool.util.GlobalConstant;
+import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -36,7 +36,7 @@ public class SignUpService {
             throw new BadRequestException("Nickname is already existed.");
 
         // Check email verification
-        String isVerify = redisUtil.getData(GlobalConstant.REDIS_EMAIL_VERIFY + data.getEmail());
+        String isVerify = redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + data.getEmail());
         if (isVerify == null)
             throw new BadRequestException("Need to verify your email first.");
 
@@ -53,8 +53,8 @@ public class SignUpService {
         memberRepository.save(memberEntity);
 
         // 가입 완료하여 인증코드, 인증여부 삭제
-        redisUtil.deleteData(GlobalConstant.REDIS_EMAIL_CODE);
-        redisUtil.deleteData(GlobalConstant.REDIS_EMAIL_VERIFY);
+        redisUtil.deleteData(CONSTANT.REDIS_EMAIL_CODE);
+        redisUtil.deleteData(CONSTANT.REDIS_EMAIL_VERIFY);
 
         return true;
     }
