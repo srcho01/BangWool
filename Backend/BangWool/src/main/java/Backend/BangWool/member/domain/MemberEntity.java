@@ -20,7 +20,7 @@ public class MemberEntity {
 
     @Column(nullable = false)
     private String name;
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String nickname;
 
     @Column(nullable = false)
@@ -28,17 +28,6 @@ public class MemberEntity {
 
     private boolean google;
     private boolean kakao;
-
-    @Builder
-    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth) {
-        this.email = email;
-        this.password = password;
-        this.name = name;
-        this.nickname = nickname;
-        this.birth = birth;
-        this.google = false;
-        this.kakao = false;
-    }
 
     @Builder
     public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, boolean google, boolean kakao) {
