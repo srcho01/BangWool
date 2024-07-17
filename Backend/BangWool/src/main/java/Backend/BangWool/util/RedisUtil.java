@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -18,11 +19,6 @@ public class RedisUtil {
         return valueOperations.get(key);
     }
 
-    public void setData(String key, String value) {
-        ValueOperations<String,String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(key, value);
-    }
-
     public void setDataExpire(String key, String value, long duration) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         Duration expireDuration = Duration.ofSeconds(duration);
@@ -32,4 +28,12 @@ public class RedisUtil {
     public void deleteData(String key) {
         redisTemplate.delete(key);
     }
+
+    private Optional<Boolean> hasKey(String key) {
+        return Optional.ofNullable(redisTemplate.hasKey(key));
+    }
+    public boolean exists(String key) {
+        return hasKey(key).orElse(false);
+    }
+
 }
