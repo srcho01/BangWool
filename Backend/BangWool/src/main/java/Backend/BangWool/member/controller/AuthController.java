@@ -63,7 +63,8 @@ public class AuthController {
     public void login(@RequestBody LoginDTO loginDTO) {}
 
 
-    @Operation(summary = "Logout", description = "Logout 요청이 오면, 기존 Access Token과 Refresh Token이 파기됩니다")
+    @Operation(summary = "Logout", description = "Logout 요청이 오면, 기존 Access Token과 Refresh Token이 파기됩니다." +
+            "\nAccess Token은 만료되어도 상관없으나 꼭 보내야합니다. Refresh Token은 만료되면 안됩니다.")
     @ApiResponse(
             responseCode = "200",
             content = @Content(
