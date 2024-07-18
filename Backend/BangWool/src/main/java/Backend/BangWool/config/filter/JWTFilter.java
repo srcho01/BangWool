@@ -3,6 +3,7 @@ package Backend.BangWool.config.filter;
 import Backend.BangWool.member.dto.SessionDto;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.JWTUtil;
+import Backend.BangWool.util.RedisUtil;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -24,9 +25,11 @@ import java.util.regex.Pattern;
 public class JWTFilter extends OncePerRequestFilter {
 
     private final JWTUtil jwtUtil;
+    private final RedisUtil redisUtil;
 
-    public JWTFilter(JWTUtil jwtUtil) {
+    public JWTFilter(JWTUtil jwtUtil, RedisUtil redisUtil) {
         this.jwtUtil = jwtUtil;
+        this.redisUtil = redisUtil;
     }
 
     @Override
@@ -68,12 +71,20 @@ public class JWTFilter extends OncePerRequestFilter {
         int memberID = jwtUtil.getMemberID(token);
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
+        long issuedAt = jwtUtil.getIssuedAt(token);
 
         // access 토큰인지 확인
         if (!category.equals("access")) {
             setBody(response, 400,"It's not a access token");
             return;
         }
+
+        // 파기된 access 토큰인지 확인
+        if (redisUtil.exists(CONSTANT.REDIS_TOKEN + token) && redisUtil.getData(CONSTANT.REDIS_TOKEN + token).equals("invalid")) {
+            setBody(response, 400, "Invalid token");
+            return;
+        }
+
 
         // 매 요청마다 ContextHolder에 Authentication 추가 (왜냐하면 Stateless이니까)
         SessionDto session = new SessionDto(memberID, username, role);
