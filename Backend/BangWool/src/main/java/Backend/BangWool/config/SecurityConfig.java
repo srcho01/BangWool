@@ -1,7 +1,8 @@
 package Backend.BangWool.config;
 
 import Backend.BangWool.config.filter.JWTFilter;
-import Backend.BangWool.config.filter.LoginFilter;
+import Backend.BangWool.config.filter.CustomLoginFilter;
+import Backend.BangWool.config.filter.CustomLogoutFilter;
 import Backend.BangWool.util.JWTUtil;
 import Backend.BangWool.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -56,8 +58,9 @@ public class SecurityConfig {
 
         // filter 등록
         http
-                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil, redisUtil), CustomLoginFilter.class)
+                .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정
         http
