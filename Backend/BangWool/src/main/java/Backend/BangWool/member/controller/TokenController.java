@@ -73,7 +73,7 @@ public class TokenController {
             return StatusResponse.build(400, "It's not a refresh token");
 
         // blacklist check
-        if (redisUtil.exists(CONSTANT.REDIS_TOKEN + refresh) && redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).equals("invalid"))
+        if (redisUtil.exists(CONSTANT.REDIS_TOKEN + refresh) && !redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).equals("valid"))
             return StatusResponse.build(400, "Invalid refresh token.");
 
         // refresh token 블랙리스트 등록
