@@ -70,7 +70,6 @@ public class EmailService {
         String codeInRedis = redis.getData(CONSTANT.REDIS_EMAIL_CODE + email);
 
         if (codeInRedis != null && codeInRedis.equals(code)) {
-            redis.deleteData(CONSTANT.REDIS_EMAIL_CODE + email);
             redis.setDataExpire(CONSTANT.REDIS_EMAIL_VERIFY + email, "true", 1800); // 30minutes
             return true;
         }

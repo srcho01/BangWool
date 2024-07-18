@@ -93,7 +93,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private boolean shouldSkip(HttpServletRequest request) {
         List<String> skipURI = new ArrayList<>();
-        skipURI.add("/login"); skipURI.add("/swagger-ui/.*"); skipURI.add("/api-docs/.*"); skipURI.add("/auth/refresh");
+        skipURI.add("/login"); skipURI.add("/swagger-ui/.*"); skipURI.add("/api-docs/.*"); skipURI.add("/auth/.*");
 
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);
