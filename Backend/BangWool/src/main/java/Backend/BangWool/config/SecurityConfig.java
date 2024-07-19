@@ -1,8 +1,11 @@
 package Backend.BangWool.config;
 
-import Backend.BangWool.config.filter.JWTFilter;
+import Backend.BangWool.config.auth.SocialAuthenticationManager;
 import Backend.BangWool.config.filter.CustomLoginFilter;
 import Backend.BangWool.config.filter.CustomLogoutFilter;
+import Backend.BangWool.config.filter.JWTFilter;
+import Backend.BangWool.config.filter.SocialLoginFilter;
+import Backend.BangWool.member.service.CustomUserDetailsService;
 import Backend.BangWool.util.JWTUtil;
 import Backend.BangWool.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +30,7 @@ public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtil jwtUtil;
     private final RedisUtil redisUtil;
+    private final CustomUserDetailsService customUserDetailsService;
 
 
     @Bean
@@ -52,14 +56,15 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api-docs/**", "/swagger-ui/**").permitAll() // Swagger
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/login/oauth").permitAll()
                         .anyRequest().authenticated()
                 );
 
         // filter 등록
         http
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, redisUtil), LogoutFilter.class)
-                .addFilterBefore(new JWTFilter(jwtUtil, redisUtil), CustomLoginFilter.class)
+                .addFilterBefore(new JWTFilter(jwtUtil, redisUtil), SocialLoginFilter.class)
+                .addFilterBefore(socialLoginFilter(), CustomLoginFilter.class)
                 .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisUtil), UsernamePasswordAuthenticationFilter.class);
 
         //세션 설정
@@ -69,4 +74,18 @@ public class SecurityConfig {
 
         return http.build();
     }
+
+    @Bean
+    public AuthenticationManager socialAuthenticationManager() {
+        return new SocialAuthenticationManager(customUserDetailsService);
+    }
+
+    @Bean
+    public SocialLoginFilter socialLoginFilter() throws Exception {
+        SocialLoginFilter filter = new SocialLoginFilter(socialAuthenticationManager(), jwtUtil, redisUtil);
+        filter.setFilterProcessesUrl("/login/oauth");
+        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+        return filter;
+    }
+
 }

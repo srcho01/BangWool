@@ -71,7 +71,6 @@ public class JWTFilter extends OncePerRequestFilter {
         int memberID = jwtUtil.getMemberID(token);
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
-        long issuedAt = jwtUtil.getIssuedAt(token);
 
         // access 토큰인지 확인
         if (!category.equals("access")) {
@@ -104,7 +103,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
     private boolean shouldSkip(HttpServletRequest request) {
         List<String> skipURI = new ArrayList<>();
-        skipURI.add("/login"); skipURI.add("/swagger-ui/.*"); skipURI.add("/api-docs/.*"); skipURI.add("/auth/.*");
+        skipURI.add("/login"); skipURI.add("/login/oauth"); skipURI.add("/swagger-ui/.*"); skipURI.add("/api-docs/.*"); skipURI.add("/auth/.*");
 
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);

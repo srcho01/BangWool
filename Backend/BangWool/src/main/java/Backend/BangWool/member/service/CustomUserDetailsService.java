@@ -25,4 +25,23 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return new CustomUserDetails(memberEntity);
     }
+
+    public boolean validateGoogle(String username, String googleId) {
+
+        MemberEntity memberEntity = memberRepository.findByEmail(username);
+        if (memberEntity == null)
+            throw new UsernameNotFoundException(username);
+
+        return googleId.equals(memberEntity.getGoogle());
+    }
+
+    public boolean validateKakao(String username, String kakaoId) {
+
+        MemberEntity memberEntity = memberRepository.findByEmail(username);
+        if (memberEntity == null)
+            throw new UsernameNotFoundException(username);
+
+        return kakaoId.equals(memberEntity.getKakao());
+    }
+
 }
