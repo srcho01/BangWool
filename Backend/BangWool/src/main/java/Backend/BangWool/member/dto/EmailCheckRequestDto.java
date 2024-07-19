@@ -15,6 +15,7 @@ public class EmailCheckRequestDto {
     private String email;
 
     @Schema(example = "OF5W05")
+    @NotEmpty(message = "Code is required")
     private String code;
 
 }

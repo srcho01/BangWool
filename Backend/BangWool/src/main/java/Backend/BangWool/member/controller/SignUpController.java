@@ -37,7 +37,7 @@ public class SignUpController {
         return DataResponse.build(false);
     }
 
-    @Operation(summary = "소셜 회원가입", description = "Google ID는 String, Kakao ID는 Long")
+    @Operation(summary = "소셜 회원가입", description = "※ googleId와 kakaoId 둘 다 없으면 안됩니다 ※")
     @PostMapping("oauth")
     public DataResponse<Boolean> socialSignUp(@Valid @RequestBody OAuthSignUpRequestDto signUpRequestDto) {
         if (signUpService.socialSignUp(signUpRequestDto))
