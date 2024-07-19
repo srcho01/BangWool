@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (memberEntity == null)
             throw new UsernameNotFoundException(username);
 
-        return googleId.equals(memberEntity.getGoogle());
+        return googleId.equals(memberEntity.getGoogleId());
     }
 
     public boolean validateKakao(String username, String kakaoId) {
@@ -41,7 +41,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (memberEntity == null)
             throw new UsernameNotFoundException(username);
 
-        return kakaoId.equals(memberEntity.getKakao());
+        return kakaoId.equals(memberEntity.getKakaoId());
     }
 
 }

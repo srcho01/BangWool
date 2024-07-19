@@ -27,17 +27,17 @@ public class MemberEntity {
     @Column(nullable = false)
     private LocalDate birth;
 
-    private String google;
-    private String kakao;
+    private String googleId;
+    private String kakaoId;
 
     @Builder
-    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String google, String kakao) {
+    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String googleId, String kakaoId) {
         this.email = email;
         this.password = password;
         this.name = name;
         this.nickname = nickname;
         this.birth = birth;
-        this.google = google;
-        this.kakao = kakao;
+        this.googleId = googleId;
+        this.kakaoId = kakaoId;
     }
 }

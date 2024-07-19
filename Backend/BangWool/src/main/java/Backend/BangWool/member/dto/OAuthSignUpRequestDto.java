@@ -38,9 +38,9 @@ public class OAuthSignUpRequestDto {
     private LocalDate birth;
 
     @Schema(example = "fajwopfjf2j09fjsvj0")
-    private String google;
+    private String googleId;
 
     @Schema(example = "913120654016")
-    private String kakao;
+    private String kakaoId;
 
 }

@@ -71,15 +71,15 @@ public class SignUpService {
         if (!isNicknameCheck)
             throw new BadRequestException("Nickname is already existed.");
 
-        String google = data.getGoogle();
-        String kakao = data.getKakao();
+        String googleId = data.getGoogleId();
+        String kakaoId = data.getKakaoId();
 
         // google, kakao ID 둘 다 없으면 Error
-        if (google == null && kakao == null)
+        if (googleId == null && kakaoId == null)
             throw new BadRequestException("You must have a social login for either Google or Kakao");
 
         // 중복 google ID, kakao ID 검사
-        if ((google != null && memberRepository.existsByGoogle(google)) || (kakao != null && memberRepository.existsByKakao(kakao)))
+        if ((googleId != null && memberRepository.existsByGoogleId(googleId)) || (kakaoId != null && memberRepository.existsByKakaoId(kakaoId)))
             throw new BadRequestException("This social account is already registered");
 
         // entity로 변환
@@ -88,8 +88,8 @@ public class SignUpService {
                 .name(data.getName())
                 .nickname(data.getNickname())
                 .birth(data.getBirth())
-                .google(google)
-                .kakao(kakao)
+                .googleId(googleId)
+                .kakaoId(kakaoId)
                 .build();
 
         // 저장
