@@ -6,7 +6,7 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Getter @Setter
+@Getter
 @NoArgsConstructor
 public class MemberEntity {
 
@@ -16,6 +16,7 @@ public class MemberEntity {
 
     @Column(unique = true, nullable = false)
     private String email;
+
     private String password;
 
     @Column(nullable = false)
@@ -26,11 +27,11 @@ public class MemberEntity {
     @Column(nullable = false)
     private LocalDate birth;
 
-    private boolean google;
-    private boolean kakao;
+    private String google;
+    private Long kakao;
 
     @Builder
-    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, boolean google, boolean kakao) {
+    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String google, Long kakao) {
         this.email = email;
         this.password = password;
         this.name = name;

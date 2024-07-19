@@ -3,6 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.LocalSignUpRequestDto;
+import Backend.BangWool.member.dto.OAuthSignUpRequestDto;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -58,6 +59,45 @@ public class SignUpService {
 
         return true;
     }
+
+    public boolean socialSignUp(OAuthSignUpRequestDto data) {
+
+        // email 중복 체크
+        if (memberRepository.existsByEmail(data.getEmail()))
+            throw new BadRequestException("User is already registered.");
+
+        // nickname 체크
+        boolean isNicknameCheck = nicknameCheck(data.getNickname());
+        if (!isNicknameCheck)
+            throw new BadRequestException("Nickname is already existed.");
+
+        String google = data.getGoogle();
+        Long kakao = data.getKakao();
+
+        // google, kakao ID 둘 다 없으면 Error
+        if (google == null && kakao == null)
+            throw new BadRequestException("You must have a social login for either Google or Kakao");
+
+        // 중복 google ID, kakao ID 검사
+        if ((google != null && memberRepository.existsByGoogle(google)) || (kakao != null && memberRepository.existsByKakao(kakao)))
+            throw new BadRequestException("This social account is already registered");
+
+        // entity로 변환
+        MemberEntity memberEntity = MemberEntity.builder()
+                .email(data.getEmail())
+                .name(data.getName())
+                .nickname(data.getNickname())
+                .birth(data.getBirth())
+                .google(google)
+                .kakao(kakao)
+                .build();
+
+        // 저장
+        memberRepository.save(memberEntity);
+
+        return true;
+    }
+
 
     private void passwordCheck(String pw1, String pw2) {
         if (!pw1.equals(pw2))
