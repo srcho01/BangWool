@@ -43,11 +43,17 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         try {
             requestBody = new ObjectMapper().readValue(request.getInputStream(), new TypeReference<Map<String, String>>(){});
         } catch (IOException e) {
-            throw new RuntimeException("Failed to parse JSON request body", e);
+            setBody(response, 400, "Failed to parse JSON request body");
+            return null;
         }
 
         username = requestBody.get("email");
         password = requestBody.get("password");
+
+        if (username == null || password == null || username.isEmpty() || password.isEmpty()) {
+            setBody(response, 400, "Email and password are required");
+            return null;
+        }
 
         // 스프링 시큐리티에서 username과 pw를 검증하기 위해 token에 담기
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
@@ -56,7 +62,6 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // token에 담은 정보를 검증하기 위해 AuthenticationManager로 전달
         return authenticationManager.authenticate(token);
-
     }
 
     // 로그인 성공 시
@@ -97,15 +102,18 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     // 로그인 실패 시
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("application/json");
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+        setBody(response, 401, "Unauthorized");
+    }
 
-        // 응답 메시지 작성
-        String jsonResponse = "{\"code\": 401, \"message\": Unauthorized}";
-
-        // 응답에 메시지 쓰기
-        response.getWriter().write(jsonResponse);
-
+    private void setBody(HttpServletResponse response, int code, String message) {
+        try {
+            response.setStatus(code);
+            response.setContentType("application/json");
+            String jsonResponse = "{\"code\": " + code + ", \"message\": " + message + "}";
+            response.getWriter().write(jsonResponse);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
