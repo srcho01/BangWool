@@ -72,7 +72,7 @@ public class SignUpService {
             throw new BadRequestException("Nickname is already existed.");
 
         String google = data.getGoogle();
-        Long kakao = data.getKakao();
+        String kakao = data.getKakao();
 
         // google, kakao ID 둘 다 없으면 Error
         if (google == null && kakao == null)

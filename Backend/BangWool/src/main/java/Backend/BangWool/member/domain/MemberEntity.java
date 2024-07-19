@@ -28,10 +28,10 @@ public class MemberEntity {
     private LocalDate birth;
 
     private String google;
-    private Long kakao;
+    private String kakao;
 
     @Builder
-    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String google, Long kakao) {
+    public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String google, String kakao) {
         this.email = email;
         this.password = password;
         this.name = name;

@@ -41,6 +41,6 @@ public class OAuthSignUpRequestDto {
     private String google;
 
     @Schema(example = "913120654016")
-    private Long kakao;
+    private String kakao;
 
 }
