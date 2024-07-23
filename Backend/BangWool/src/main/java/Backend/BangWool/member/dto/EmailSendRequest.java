@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 
 @Getter
-public class EmailSendRequestDto {
+public class EmailSendRequest {
 
     @Schema(example = "test@gmail.com")
     @Email(message = "Email is out form")

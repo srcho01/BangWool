@@ -1,5 +1,7 @@
 package Backend.BangWool.member.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,19 +12,15 @@ import java.util.Collection;
 
 @Getter
 @Setter
-public class SessionDto implements UserDetails {
+@AllArgsConstructor
+@Builder
+public class Session implements UserDetails {
 
     // 유저의 이메일이 들어간다
     // 유저의 이메일은 중복 불가능하다
     private int id;
     private String username;
     private String role;
-
-    public SessionDto(int id, String username, String role) {
-        this.id = id;
-        this.username = username;
-        this.role = role;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

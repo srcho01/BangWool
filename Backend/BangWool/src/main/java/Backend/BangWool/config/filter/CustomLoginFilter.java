@@ -1,7 +1,7 @@
 package Backend.BangWool.config.filter;
 
 import Backend.BangWool.member.dto.CustomUserDetails;
-import Backend.BangWool.member.dto.TokenResponseDto;
+import Backend.BangWool.member.dto.TokenResponse;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.JWTUtil;
@@ -90,8 +90,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
 
         // 응답 구성하기 (헤더, 바디)
-        TokenResponseDto tokenDto = new TokenResponseDto(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
-        DataResponse<TokenResponseDto> tokenBody = DataResponse.build(tokenDto);
+        TokenResponse tokenDto = new TokenResponse(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
+        DataResponse<TokenResponse> tokenBody = DataResponse.build(tokenDto);
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(tokenBody);
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Schema(description = "Email Request DTO")
 @Getter
-public class EmailCheckRequestDto {
+public class EmailCheckRequest {
 
     @Schema(example = "test@gmail.com")
     @Email(message = "Email is out form")

@@ -2,8 +2,8 @@ package Backend.BangWool.member.service;
 
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.LocalSignUpRequestDto;
-import Backend.BangWool.member.dto.OAuthSignUpRequestDto;
+import Backend.BangWool.member.dto.LocalSignUpRequest;
+import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -22,7 +22,7 @@ public class SignUpService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisUtil redisUtil;
 
-    public boolean localSignUp(LocalSignUpRequestDto data) {
+    public boolean localSignUp(LocalSignUpRequest data) {
 
         // member 중복 체크
         if (memberRepository.existsByEmail(data.getEmail()))
@@ -60,7 +60,7 @@ public class SignUpService {
         return true;
     }
 
-    public boolean socialSignUp(OAuthSignUpRequestDto data) {
+    public boolean socialSignUp(OAuthSignUpRequest data) {
 
         // email 중복 체크
         if (memberRepository.existsByEmail(data.getEmail()))

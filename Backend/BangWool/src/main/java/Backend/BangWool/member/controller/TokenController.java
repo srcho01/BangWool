@@ -1,7 +1,7 @@
 package Backend.BangWool.member.controller;
 
-import Backend.BangWool.member.dto.TokenRefreshRequestDto;
-import Backend.BangWool.member.dto.TokenResponseDto;
+import Backend.BangWool.member.dto.TokenRefreshRequest;
+import Backend.BangWool.member.dto.TokenResponse;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.ResponseDTO;
 import Backend.BangWool.response.StatusResponse;
@@ -48,7 +48,7 @@ public class TokenController {
             )
     )
     @PostMapping("refresh")
-    public ResponseDTO refresh(@Valid @RequestBody TokenRefreshRequestDto tokenDto) {
+    public ResponseDTO refresh(@Valid @RequestBody TokenRefreshRequest tokenDto) {
 
         // token 가져오기
         String refresh = tokenDto.refreshToken();
@@ -89,7 +89,7 @@ public class TokenController {
         redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + refresh, "valid", CONSTANT.REFRESH_EXPIRED);
 
         // 새 토큰 응답
-        TokenResponseDto newToken = new TokenResponseDto(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
+        TokenResponse newToken = new TokenResponse(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
         return DataResponse.build(newToken);
     }
 

@@ -16,7 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @AllArgsConstructor
-public class OAuthSignUpRequestDto {
+public class OAuthSignUpRequest {
 
     @Schema(example = "test@gmail.com")
     @NotEmpty(message = "Email is Required")

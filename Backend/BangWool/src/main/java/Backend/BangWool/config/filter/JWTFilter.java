@@ -1,6 +1,6 @@
 package Backend.BangWool.config.filter;
 
-import Backend.BangWool.member.dto.SessionDto;
+import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.JWTUtil;
 import Backend.BangWool.util.RedisUtil;
@@ -86,7 +86,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
 
         // 매 요청마다 ContextHolder에 Authentication 추가 (왜냐하면 Stateless이니까)
-        SessionDto session = new SessionDto(memberID, username, role);
+        Session session = new Session(memberID, username, role);
         Authentication authToken = new UsernamePasswordAuthenticationToken(session, null, session.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken); // user session 생성
 
