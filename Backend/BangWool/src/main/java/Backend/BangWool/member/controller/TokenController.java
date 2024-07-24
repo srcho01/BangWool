@@ -1,10 +1,9 @@
 package Backend.BangWool.member.controller;
 
+import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.dto.TokenRefreshRequest;
 import Backend.BangWool.member.dto.TokenResponse;
 import Backend.BangWool.response.DataResponse;
-import Backend.BangWool.response.ResponseDTO;
-import Backend.BangWool.response.StatusResponse;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.JWTUtil;
 import Backend.BangWool.util.RedisUtil;
@@ -48,7 +47,7 @@ public class TokenController {
             )
     )
     @PostMapping("refresh")
-    public ResponseDTO refresh(@Valid @RequestBody TokenRefreshRequest tokenDto) {
+    public DataResponse<TokenResponse> refresh(@Valid @RequestBody TokenRefreshRequest tokenDto) {
 
         // token 가져오기
         String refresh = tokenDto.refreshToken();
@@ -56,9 +55,9 @@ public class TokenController {
         // expired check
         try {
             if (jwtUtil.isExpired(refresh))
-                return StatusResponse.build(400, "Refresh token is expired. Please log in again.");
+                throw new BadRequestException("Refresh token is expired. Please log in again.");
         } catch (MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
-            return StatusResponse.build(400, "Token form is incorrect");
+            throw new BadRequestException("Token form is incorrect");
         }
 
         // 정보 가져오기
@@ -70,11 +69,11 @@ public class TokenController {
 
         // token이 refresh인지 확인
         if (!category.equals("refresh"))
-            return StatusResponse.build(400, "It's not a refresh token");
+            throw new BadRequestException("It's not a refresh token");
 
         // blacklist check
         if (redisUtil.exists(CONSTANT.REDIS_TOKEN + refresh) && !redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).equals("valid"))
-            return StatusResponse.build(400, "Invalid refresh token.");
+            throw new BadRequestException("Invalid refresh token.");
 
         // refresh token 블랙리스트 등록
         Date now = new Date();
