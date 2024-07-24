@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class LocalSignUpRequest {
 
     @Schema(example = "test@gmail.com")
