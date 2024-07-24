@@ -7,10 +7,12 @@ import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,6 +24,7 @@ public class SignUpService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisUtil redisUtil;
 
+    @Transactional
     public boolean localSignUp(LocalSignUpRequest data) {
 
         // member 중복 체크
@@ -32,14 +35,12 @@ public class SignUpService {
         passwordCheck(data.getPassword1(), data.getPassword2());
 
         // nickname 체크
-        boolean isNicknameCheck = nicknameCheck(data.getNickname());
-        if (!isNicknameCheck)
-            throw new BadRequestException("Nickname is already existed.");
+        nicknameCheck(data.getNickname());
 
         // Check email verification
-        String isVerify = redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + data.getEmail());
-        if (isVerify == null)
-            throw new BadRequestException("Need to verify your email first.");
+        String key = CONSTANT.REDIS_EMAIL_VERIFY + data.getEmail();
+        Optional.ofNullable(redisUtil.getData(key))
+                .orElseThrow(() -> new BadRequestException("Need to verify your email first."));
 
         // entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
@@ -60,6 +61,7 @@ public class SignUpService {
         return true;
     }
 
+    @Transactional
     public boolean socialSignUp(OAuthSignUpRequest data) {
 
         // email 중복 체크
@@ -67,9 +69,7 @@ public class SignUpService {
             throw new BadRequestException("User is already registered.");
 
         // nickname 체크
-        boolean isNicknameCheck = nicknameCheck(data.getNickname());
-        if (!isNicknameCheck)
-            throw new BadRequestException("Nickname is already existed.");
+        nicknameCheck(data.getNickname());
 
         String googleId = data.getGoogleId();
         String kakaoId = data.getKakaoId();
@@ -114,9 +114,6 @@ public class SignUpService {
 
     public boolean nicknameCheck(String nickname) {
 
-        if (nickname == null || nickname.isEmpty())
-            throw new BadRequestException("Nickname is empty.");
-
         String regex = "^[가-힣a-zA-Z0-9]{1,10}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(nickname);
@@ -124,6 +121,9 @@ public class SignUpService {
         if (!matcher.matches())
             throw new BadRequestException("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
 
-        return !memberRepository.existsByNickname(nickname);
+        if (memberRepository.existsByNickname(nickname))
+            throw new BadRequestException("Nickname is already existed.");
+
+        return true;
     }
 }
