@@ -51,7 +51,7 @@ public class EmailService {
                     "</body>" +
                 "</html>";
 
-        redis.setDataExpire(CONSTANT.REDIS_EMAIL_CODE + email, code, 600); // 10minutes
+        redis.setDataExpire(CONSTANT.REDIS_EMAIL_CODE + email, code, 10 * 60L); // 10minutes
 
         try {
             helper.setTo(email);
@@ -70,7 +70,7 @@ public class EmailService {
         String codeInRedis = redis.getData(CONSTANT.REDIS_EMAIL_CODE + email);
 
         if (codeInRedis != null && codeInRedis.equals(code)) {
-            redis.setDataExpire(CONSTANT.REDIS_EMAIL_VERIFY + email, "true", 1800); // 30minutes
+            redis.setDataExpire(CONSTANT.REDIS_EMAIL_VERIFY + email, "true", 30 * 60L); // 30minutes
             return true;
         }
         return false;
