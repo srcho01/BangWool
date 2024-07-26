@@ -156,7 +156,7 @@ class SignUpControllerTest {
         when(signUpService.localSignUp(any(LocalSignUpRequest.class))).thenReturn(true);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(true));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(200));
         mvc.perform(post("/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -245,7 +245,7 @@ class SignUpControllerTest {
         when(signUpService.socialSignUp(any(OAuthSignUpRequest.class))).thenReturn(true);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(true));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(200));
         mvc.perform(post("/auth/signup/oauth")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
