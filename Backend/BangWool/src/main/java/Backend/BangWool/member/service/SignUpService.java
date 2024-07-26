@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,6 +22,7 @@ public class SignUpService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisUtil redisUtil;
+    private final AccountService accountService;
 
     @Transactional
     public boolean localSignUp(LocalSignUpRequest data) {
@@ -32,15 +32,13 @@ public class SignUpService {
             throw new BadRequestException("User is already registered.");
 
         // password 체크
-        passwordCheck(data.getPassword1(), data.getPassword2());
+        accountService.passwordCheck(data.getPassword1(), data.getPassword2());
 
         // nickname 체크
         nicknameCheck(data.getNickname());
 
         // Check email verification
-        String key = CONSTANT.REDIS_EMAIL_VERIFY + data.getEmail();
-        Optional.ofNullable(redisUtil.getData(key))
-                .orElseThrow(() -> new BadRequestException("Need to verify your email first."));
+        accountService.emailVerficationCheck(data.getEmail());
 
         // entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
@@ -98,19 +96,6 @@ public class SignUpService {
         return true;
     }
 
-
-    private void passwordCheck(String pw1, String pw2) {
-        if (!pw1.equals(pw2))
-            throw new BadRequestException("Passwords do not match.");
-
-        String regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[~!@#$%^&*()+|=])[A-Za-z\\d~!@#$%^&*()+|=]{8,16}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(pw1);
-
-        if (!matcher.matches())
-            throw new BadRequestException("The password must be 8 to 20 characters, including all English, numbers, and special characters.");
-
-    }
 
     public boolean nicknameCheck(String nickname) {
 
