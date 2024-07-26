@@ -4,6 +4,7 @@ import Backend.BangWool.member.dto.LocalSignUpRequest;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.service.SignUpService;
 import Backend.BangWool.response.DataResponse;
+import Backend.BangWool.response.StatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,18 +32,18 @@ public class SignUpController {
 
     @Operation(summary = "자체 회원가입")
     @PostMapping("local")
-    public DataResponse<Boolean> localSignUp(@Valid @RequestBody LocalSignUpRequest signUpRequestDto) {
+    public StatusResponse localSignUp(@Valid @RequestBody LocalSignUpRequest signUpRequestDto) {
         if (signUpService.localSignUp(signUpRequestDto))
-            return DataResponse.build(true);
-        return DataResponse.build(false);
+            return StatusResponse.build(200);
+        return StatusResponse.build(500);
     }
 
     @Operation(summary = "소셜 회원가입", description = "※ googleId와 kakaoId 둘 다 없으면 안됩니다 ※")
     @PostMapping("oauth")
-    public DataResponse<Boolean> socialSignUp(@Valid @RequestBody OAuthSignUpRequest signUpRequestDto) {
+    public StatusResponse socialSignUp(@Valid @RequestBody OAuthSignUpRequest signUpRequestDto) {
         if (signUpService.socialSignUp(signUpRequestDto))
-            return DataResponse.build(true);
-        return DataResponse.build(false);
+            return StatusResponse.build(200);
+        return StatusResponse.build(500);
     }
 
 }
