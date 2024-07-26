@@ -17,6 +17,7 @@ public class MemberEntity {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @Setter
     private String password;
 
     @Column(nullable = false)
@@ -40,4 +41,5 @@ public class MemberEntity {
         this.googleId = googleId;
         this.kakaoId = kakaoId;
     }
+
 }
