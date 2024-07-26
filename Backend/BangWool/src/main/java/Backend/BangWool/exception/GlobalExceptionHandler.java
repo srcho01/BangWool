@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.ConnectException;
 
@@ -26,6 +27,24 @@ public class GlobalExceptionHandler {
                 "Invalid arguments" :
                 e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
         StatusResponse response = StatusResponse.build(400, errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    private String extractErrorMessage(MethodArgumentTypeMismatchException ex) {
+        String parameterName = ex.getName();
+        String parameterType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
+        String value = ex.getValue() != null ? ex.getValue().toString() : "null";
+        return String.format("Parameter '%s' with value '%s' could not be converted to type '%s'", parameterName, value, parameterType);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<StatusResponse> handleMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
+        String parameterName = e.getName();
+        String parameterType = e.getRequiredType() != null ? e.getRequiredType().getSimpleName() : "unknown";
+        String value = e.getValue() != null ? e.getValue().toString() : "null";
+        String message = String.format("Parameter '%s' with value '%s' could not be converted to type '%s'", parameterName, value, parameterType);
+
+        StatusResponse response = StatusResponse.build(400, message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
