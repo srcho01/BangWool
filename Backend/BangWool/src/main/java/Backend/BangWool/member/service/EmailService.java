@@ -67,9 +67,7 @@ public class EmailService {
     }
 
     public boolean checkCode(String email, String code) {
-        String codeInRedis = redis.getData(CONSTANT.REDIS_EMAIL_CODE + email);
-
-        if (codeInRedis != null && codeInRedis.equals(code)) {
+        if (code != null && redis.getData(CONSTANT.REDIS_EMAIL_CODE + email).filter(code::equals).isPresent()) {
             redis.setDataExpire(CONSTANT.REDIS_EMAIL_VERIFY + email, "true", 30 * 60L); // 30minutes
             return true;
         }

@@ -14,9 +14,9 @@ public class RedisUtil {
 
     private final StringRedisTemplate redisTemplate;
 
-    public String getData(String key) {
+    public Optional<String> getData(String key) {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        return valueOperations.get(key);
+        return Optional.ofNullable(valueOperations.get(key));
     }
 
     public void setDataExpire(String key, String value, long duration) {

@@ -18,28 +18,25 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        MemberEntity memberEntity = memberRepository.findByEmail(username); // 조회
-
-        if (memberEntity == null)
-            throw new UsernameNotFoundException(username);
+        // 조회
+        MemberEntity memberEntity = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
 
         return new CustomUserDetails(memberEntity);
     }
 
     public boolean validateGoogle(String username, String googleId) {
 
-        MemberEntity memberEntity = memberRepository.findByEmail(username);
-        if (memberEntity == null)
-            throw new UsernameNotFoundException(username);
+        MemberEntity memberEntity = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
 
         return googleId.equals(memberEntity.getGoogleId());
     }
 
     public boolean validateKakao(String username, String kakaoId) {
 
-        MemberEntity memberEntity = memberRepository.findByEmail(username);
-        if (memberEntity == null)
-            throw new UsernameNotFoundException(username);
+        MemberEntity memberEntity = memberRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
 
         return kakaoId.equals(memberEntity.getKakaoId());
     }

@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,7 +70,12 @@ class SignUpServiceTest {
         // mocking
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(isEmailExist);
         when(memberRepository.existsByNickname(request.getNickname())).thenReturn(isNicknameExist);
-        when(redisUtill.getData(CONSTANT.REDIS_EMAIL_VERIFY + request.getEmail())).thenReturn(getVerifyData);
+        if (getVerifyData == null) {
+            when(redisUtill.getData(CONSTANT.REDIS_EMAIL_VERIFY + request.getEmail())).thenReturn(Optional.empty());
+        } else {
+            when(redisUtill.getData(CONSTANT.REDIS_EMAIL_VERIFY + request.getEmail())).thenReturn(Optional.of(getVerifyData));
+        }
+
 
         // when & then
         assertThrows(BadRequestException.class, () -> signUpService.localSignUp(request));
@@ -93,7 +99,7 @@ class SignUpServiceTest {
         // mocking
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(memberRepository.existsByNickname(request.getNickname())).thenReturn(false);
-        when(redisUtill.getData(CONSTANT.REDIS_EMAIL_VERIFY + request.getEmail())).thenReturn("true");
+        when(redisUtill.getData(CONSTANT.REDIS_EMAIL_VERIFY + request.getEmail())).thenReturn(Optional.of("true"));
 
         // when
         signUpService.localSignUp(request);

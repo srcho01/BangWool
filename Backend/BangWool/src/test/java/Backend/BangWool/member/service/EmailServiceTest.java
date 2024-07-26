@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +57,7 @@ class EmailServiceTest {
         String code = "W63F5S";
 
         // mocking
-        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(code);
+        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.of(code));
 
         // when
         boolean result = emailService.checkCode(email, code);
@@ -80,13 +81,16 @@ class EmailServiceTest {
     @MethodSource("invalidCheckCode") // given
     void checkCodeFail(String email, String code, String redisCode) {
         // mocking
-        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(redisCode);
+        if (redisCode == null) {
+            when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.empty());
+        } else {
+            when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.of(redisCode));
+        }
 
         // when
         boolean result = emailService.checkCode(email, code);
 
         // then
-        verify(redisUtil, times(1)).getData(eq(CONSTANT.REDIS_EMAIL_CODE + email));
         verify(redisUtil, never()).setDataExpire(eq(CONSTANT.REDIS_EMAIL_VERIFY + email), eq("true"), eq(1800L));
         assertThat(result).isEqualTo(false);
     }

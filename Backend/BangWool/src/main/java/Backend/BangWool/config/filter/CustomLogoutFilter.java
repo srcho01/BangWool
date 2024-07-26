@@ -112,7 +112,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         // DB 저장 확인
-        if (!redisUtil.exists(CONSTANT.REDIS_TOKEN + refresh) || !"valid".equals(redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh))) {
+        if (redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).filter("valid"::equals).isEmpty()) {
             setBody(response, 400, "Refresh token expired");
             return;
         }

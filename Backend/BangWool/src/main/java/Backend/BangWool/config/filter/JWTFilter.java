@@ -76,7 +76,7 @@ public class JWTFilter extends OncePerRequestFilter {
         }
 
         // 파기된 access 토큰인지 확인
-        if (redisUtil.exists(CONSTANT.REDIS_TOKEN + token) && redisUtil.getData(CONSTANT.REDIS_TOKEN + token).equals("invalid")) {
+        if (redisUtil.getData(CONSTANT.REDIS_TOKEN + token).filter("invalid"::equals).isPresent()) {
             setBody(response, 400, "Invalid token");
             return;
         }

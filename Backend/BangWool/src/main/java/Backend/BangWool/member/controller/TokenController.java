@@ -72,7 +72,7 @@ public class TokenController {
             throw new BadRequestException("It's not a refresh token");
 
         // blacklist check
-        if (redisUtil.exists(CONSTANT.REDIS_TOKEN + refresh) && !redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).equals("valid"))
+        if (redisUtil.getData(CONSTANT.REDIS_TOKEN + refresh).filter("valid"::equals).isEmpty())
             throw new BadRequestException("Invalid refresh token.");
 
         // refresh token 블랙리스트 등록
