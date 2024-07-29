@@ -3,6 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
+import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -78,6 +79,22 @@ public class AccountService {
         memberRepository.save(member);
 
         return true;
+    }
+
+    public MemberInfoResponse getMemberInfo(String email) {
+
+        MemberEntity member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        return MemberInfoResponse.builder()
+                .memberID(member.getMemberID())
+                .email(member.getEmail())
+                .name(member.getName())
+                .nickname(member.getNickname())
+                .birth(member.getBirth())
+                .googleId(member.getGoogleId())
+                .kakaoId((member.getKakaoId()))
+                .build();
     }
 
 
