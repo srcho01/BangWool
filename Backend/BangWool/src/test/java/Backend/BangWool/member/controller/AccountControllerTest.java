@@ -1,10 +1,7 @@
 package Backend.BangWool.member.controller;
 
 import Backend.BangWool.config.TestSecurityConfig;
-import Backend.BangWool.member.dto.ChangePasswordRequest;
-import Backend.BangWool.member.dto.EmailCheckRequest;
-import Backend.BangWool.member.dto.EmailSendForPasswordRequest;
-import Backend.BangWool.member.dto.SetPasswordRequest;
+import Backend.BangWool.member.dto.*;
 import Backend.BangWool.member.service.AccountService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
@@ -49,7 +46,7 @@ public class AccountControllerTest {
     @Test
     void findEmailFail() throws Exception {
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, "Required parameter not found."));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
 
         mvc.perform(get("/auth/lost/id")
                         .param("name", "test"))
@@ -79,7 +76,7 @@ public class AccountControllerTest {
         when(accountService.findEmail(name, birth)).thenReturn(email);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(email));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(email));
 
         mvc.perform(get("/auth/lost/id")
                         .param("name", name)
@@ -132,7 +129,7 @@ public class AccountControllerTest {
         when(accountService.sendEmailForPassword(dto.getEmail(), dto.getName(), dto.getBirth())).thenReturn(true);
 
         // then
-        String response = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String response = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/auth/lost/password/email-send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
@@ -161,7 +158,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/lost/password/email-check")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -185,7 +182,7 @@ public class AccountControllerTest {
         when(accountService.checkCodeForPassword(request.getEmail(), request.getCode())).thenReturn(isMatch);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(isMatch));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(isMatch));
         System.out.println(responseJson);
         mvc.perform(post("/auth/lost/password/email-check")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -218,7 +215,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // then
-        String response = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String response = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/lost/password/new")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -245,7 +242,7 @@ public class AccountControllerTest {
         when(accountService.setNewPassword(email, pw1, pw2)).thenReturn(true);
 
         // then
-        String response = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String response = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/auth/lost/password/new")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -278,7 +275,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // then
-        String response = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String response = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/user/password/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -307,7 +304,7 @@ public class AccountControllerTest {
         when(accountService.changePassword(email, prev, pw1, pw2)).thenReturn(true);
 
         // then
-        String response = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String response = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/user/password/change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -315,5 +312,39 @@ public class AccountControllerTest {
                 .andExpect(content().json(response));
     }
 
+
+    @DisplayName("회원정보 조회 - 에러")
+    @Test
+    void getMemberInfoFail() throws Exception {
+        // then
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
+
+        mvc.perform(get("/user/info"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(responseJson));
+    }
+
+    @DisplayName("회원정보 조회 - 성공")
+    @Test
+    void getMemberInfoSuccess() throws Exception {
+        // given
+        String email = "test@test.com";
+
+        // when
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                        .email(email)
+                        .name("test")
+                        .nickname("test")
+                        .birth(LocalDate.of(2000, 1, 1))
+                        .build();
+        when(accountService.getMemberInfo(email)).thenReturn(response);
+
+        // then
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
+        mvc.perform(get("/user/info")
+                        .param("email", email))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
 
 }

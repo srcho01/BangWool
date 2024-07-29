@@ -3,6 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
+import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -43,7 +44,7 @@ class AccountServiceTest {
     AccountService accountService;
 
 
-    @DisplayName("이메일 찾기 - 실패 : 없는 유저")
+    @DisplayName("이메일 찾기 - 에러 : 없는 유저")
     @Test
     void findEmailFail() {
         // given
@@ -77,7 +78,8 @@ class AccountServiceTest {
         assertThat(result).isEqualTo(email);
     }
 
-    @DisplayName("이메일 인증 코드 전송 - 실패 : 존재하지 않는 유저")
+
+    @DisplayName("이메일 인증 코드 전송 - 에러 : 존재하지 않는 유저")
     @Test
     void sendEmailForPasswordFail() {
         // given
@@ -126,7 +128,7 @@ class AccountServiceTest {
         );
     }
 
-    @DisplayName("새 비밀번호 변경 - 실패")
+    @DisplayName("새 비밀번호 변경 - 에러")
     @ParameterizedTest
     @MethodSource("invalidSetPassword")
     void setNewPasswordFail(boolean isMemberExist, boolean isVerify, String pw1, String pw2) {
@@ -166,6 +168,7 @@ class AccountServiceTest {
         assertThat(result).isEqualTo(true);
     }
 
+
     private static Stream<Arguments> invalidChangePassword() {
         return Stream.of(
                 Arguments.of(false, false, "test1234!!", "test1234!!", "test1234!!"),
@@ -177,7 +180,7 @@ class AccountServiceTest {
         );
     }
 
-    @DisplayName("비밀번호 변경 - 실패")
+    @DisplayName("비밀번호 변경 - 에러")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
     void changePasswordFail(boolean isMemberExist, boolean isVerify, String prevPW, String newPW1, String newPW2) {
@@ -223,6 +226,46 @@ class AccountServiceTest {
 
         assertThat(result).isEqualTo(true);
 
+    }
+
+
+    @DisplayName("회원정보 조회 - 에러 : 없는 유저")
+    @Test
+    void getMemberInfoFail() {
+        // given
+        String email = "test@test.com";
+
+        // mocking
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
+
+        // when & then
+        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.getMemberInfo(email));
+        assertThat(e.getMessage()).isEqualTo("User not found");
+    }
+
+    @DisplayName("회원정보 조회 - 성공")
+    @Test
+    void getMemberInfoSuccess() {
+        // given
+        String email = "test@test.com";
+
+        // mocking
+        MemberEntity member = MemberEntity.builder()
+                .email(email)
+                .password("1234")
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("anfiuownen")
+                .kakaoId("12198964732")
+                .build();
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        // when
+        MemberInfoResponse result = accountService.getMemberInfo(email);
+
+        // then
+        assertThat(result).isInstanceOf(MemberInfoResponse.class);
     }
 
 }
