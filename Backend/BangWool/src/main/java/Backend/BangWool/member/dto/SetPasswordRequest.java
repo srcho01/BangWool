@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Objects;
+
 @Getter
 @SuperBuilder
 @AllArgsConstructor
@@ -25,5 +27,12 @@ public class SetPasswordRequest {
     @Schema(example = "test1234!!")
     @NotEmpty(message = "password confirmation is Required")
     private String password2;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof SetPasswordRequest that)) return false;
+        return Objects.equals(email, that.email) && Objects.equals(password1, that.password1) && Objects.equals(password2, that.password2);
+    }
 
 }

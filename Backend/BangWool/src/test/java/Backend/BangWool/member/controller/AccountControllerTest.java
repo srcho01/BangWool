@@ -126,7 +126,7 @@ public class AccountControllerTest {
         String request = objectMapper.writeValueAsString(dto);
 
         // when
-        when(accountService.sendEmailForPassword(dto.getEmail(), dto.getName(), dto.getBirth())).thenReturn(true);
+        when(accountService.sendEmailForPassword(dto)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));
@@ -179,7 +179,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // when
-        when(accountService.checkCodeForPassword(request.getEmail(), request.getCode())).thenReturn(isMatch);
+        when(accountService.checkCodeForPassword(request)).thenReturn(isMatch);
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(isMatch));
@@ -239,7 +239,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // mocking
-        when(accountService.setNewPassword(email, pw1, pw2)).thenReturn(true);
+        when(accountService.setNewPassword(request)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));
@@ -301,7 +301,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // mocking
-        when(accountService.changePassword(email, prev, pw1, pw2)).thenReturn(true);
+        when(accountService.changePassword(request)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));

@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Schema(description = "Email Request for finding password DTO")
 @Getter
@@ -28,5 +29,13 @@ public class EmailSendForPasswordRequest extends EmailSendRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birth;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EmailSendForPasswordRequest that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(name, that.name) && Objects.equals(birth, that.birth);
+    }
 
 }

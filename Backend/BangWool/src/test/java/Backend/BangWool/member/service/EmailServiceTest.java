@@ -1,5 +1,7 @@
 package Backend.BangWool.member.service;
 
+import Backend.BangWool.member.dto.EmailCheckRequest;
+import Backend.BangWool.member.dto.EmailSendRequest;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
@@ -31,42 +33,26 @@ class EmailServiceTest {
     @Autowired
     private EmailService emailService;
 
+    
     @Test
-    @DisplayName("이메일 보내기")
+    @DisplayName("이메일 전송 - 성공")
     void sendEmail() throws Exception {
         // given
         String email = "test@test.com";
+        EmailSendRequest request = EmailSendRequest.builder().email(email).build();
 
         // mocking
         MimeMessage mimeMessage = mock(MimeMessage.class);
         when(mailSender.createMimeMessage()).thenReturn(mimeMessage);
 
         // when
-        emailService.sendEmail(email);
+        emailService.sendEmail(request);
 
         // then - 메시지 검증
         verify(mailSender, times(1)).send(mimeMessage);
         verify(redisUtil, times(1)).setDataExpire(eq(CONSTANT.REDIS_EMAIL_CODE + email), anyString(), eq(600L));
     }
 
-    @Test
-    @DisplayName("이메일 코드 확인 성공")
-    void checkCodeSuccess() {
-        // given
-        String email = "test@test.com";
-        String code = "W63F5S";
-
-        // mocking
-        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.of(code));
-
-        // when
-        boolean result = emailService.checkCode(email, code);
-
-        // then
-        verify(redisUtil, times(1)).getData(eq(CONSTANT.REDIS_EMAIL_CODE + email));
-        verify(redisUtil, times(1)).setDataExpire(eq(CONSTANT.REDIS_EMAIL_VERIFY + email), eq("true"), eq(1800L));
-        assertThat(result).isEqualTo(true);
-    }
 
     private static Stream<Arguments> invalidCheckCode() {
         return Stream.of(
@@ -77,9 +63,15 @@ class EmailServiceTest {
     }
 
     @ParameterizedTest
-    @DisplayName("이메일 코드 확인 실패")
+    @DisplayName("이메일 코드 확인 - 실패")
     @MethodSource("invalidCheckCode") // given
     void checkCodeFail(String email, String code, String redisCode) {
+        // given
+        EmailCheckRequest request = EmailCheckRequest.builder()
+                .email(email)
+                .code(code)
+                .build();
+
         // mocking
         if (redisCode == null) {
             when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.empty());
@@ -88,11 +80,33 @@ class EmailServiceTest {
         }
 
         // when
-        boolean result = emailService.checkCode(email, code);
+        boolean result = emailService.checkCode(request);
 
         // then
         verify(redisUtil, never()).setDataExpire(eq(CONSTANT.REDIS_EMAIL_VERIFY + email), eq("true"), eq(1800L));
         assertThat(result).isEqualTo(false);
     }
 
+    @Test
+    @DisplayName("이메일 코드 확인 - 성공")
+    void checkCodeSuccess() {
+        // given
+        String email = "test@test.com";
+        String code = "W63F5S";
+        EmailCheckRequest request = EmailCheckRequest.builder()
+                .email(email)
+                .code(code)
+                .build();
+
+        // mocking
+        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_CODE + email)).thenReturn(Optional.of(code));
+
+        // when
+        boolean result = emailService.checkCode(request);
+
+        // then
+        verify(redisUtil, times(1)).getData(eq(CONSTANT.REDIS_EMAIL_CODE + email));
+        verify(redisUtil, times(1)).setDataExpire(eq(CONSTANT.REDIS_EMAIL_VERIFY + email), eq("true"), eq(1800L));
+        assertThat(result).isEqualTo(true);
+    }
 }

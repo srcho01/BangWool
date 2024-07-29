@@ -1,6 +1,8 @@
 package Backend.BangWool.member.service;
 
 import Backend.BangWool.exception.ServerException;
+import Backend.BangWool.member.dto.EmailCheckRequest;
+import Backend.BangWool.member.dto.EmailSendRequest;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
 import jakarta.mail.internet.MimeMessage;
@@ -34,7 +36,10 @@ public class EmailService {
 
     @Async
     @Transactional
-    public void sendEmail(String email) {
+    public void sendEmail(EmailSendRequest request) {
+
+        String email = request.getEmail();
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
 
@@ -66,7 +71,11 @@ public class EmailService {
         }
     }
 
-    public boolean checkCode(String email, String code) {
+    public boolean checkCode(EmailCheckRequest request) {
+
+        String email = request.getEmail();
+        String code = request.getCode();
+
         if (code != null && redis.getData(CONSTANT.REDIS_EMAIL_CODE + email).filter(code::equals).isPresent()) {
             redis.setDataExpire(CONSTANT.REDIS_EMAIL_VERIFY + email, "true", 30 * 60L); // 30minutes
             return true;

@@ -3,7 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.MemberInfoResponse;
+import Backend.BangWool.member.dto.*;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -86,12 +86,17 @@ class AccountServiceTest {
         String email = "test@test.com";
         String name = "test";
         LocalDate birth = LocalDate.of(1990, 1, 1);
+        EmailSendForPasswordRequest request = EmailSendForPasswordRequest.builder()
+                .email(email)
+                .name(name)
+                .birth(birth)
+                .build();
 
         // mocking
         when(memberRepository.findByEmailAndNameAndBirth(email, name, birth)).thenReturn(Optional.empty());
 
         // when & then
-        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.sendEmailForPassword(email, name, birth));
+        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.sendEmailForPassword(request));
         assertThat(e.getMessage()).isEqualTo("No users have that email, name and birth.");
     }
 
@@ -102,18 +107,23 @@ class AccountServiceTest {
         String email = "test@test.com";
         String name = "test";
         LocalDate birth = LocalDate.of(1990, 1, 1);
+        EmailSendForPasswordRequest request = EmailSendForPasswordRequest.builder()
+                .email(email)
+                .name(name)
+                .birth(birth)
+                .build();
 
         // mocking
         MemberEntity member = MemberEntity.builder().email(email).build();
         when(memberRepository.findByEmailAndNameAndBirth(email, name, birth)).thenReturn(Optional.ofNullable(member));
-        doNothing().when(emailService).sendEmail(email);
+        doNothing().when(emailService).sendEmail(EmailSendRequest.builder().email(email).build());
 
         // when
-        boolean result = accountService.sendEmailForPassword(email, name, birth);
+        boolean result = accountService.sendEmailForPassword(request);
 
         // then
         verify(memberRepository, times(1)).findByEmailAndNameAndBirth(email, name, birth);
-        verify(emailService, times(1)).sendEmail(email);
+        verify(emailService, times(1)).sendEmail(any(EmailSendRequest.class));
         assertThat(result).isEqualTo(true);
     }
 
@@ -134,6 +144,11 @@ class AccountServiceTest {
     void setNewPasswordFail(boolean isMemberExist, boolean isVerify, String pw1, String pw2) {
         // given
         String email = "test@test.com";
+        SetPasswordRequest request = SetPasswordRequest.builder()
+                .email(email)
+                .password1(pw1)
+                .password2(pw2)
+                .build();
 
         // mocking
         when(memberRepository.findByEmail(email)).thenReturn(isMemberExist ? Optional.of(MemberEntity.builder().build()) : Optional.empty());
@@ -141,9 +156,9 @@ class AccountServiceTest {
 
         // when & then
         if (isMemberExist) {
-            assertThrows(BadRequestException.class, () -> accountService.setNewPassword(email, pw1, pw2));
+            assertThrows(BadRequestException.class, () -> accountService.setNewPassword(request));
         } else {
-            assertThrows(NotFoundException.class, () -> accountService.setNewPassword(email, pw1, pw2));
+            assertThrows(NotFoundException.class, () -> accountService.setNewPassword(request));
         }
     }
 
@@ -154,13 +169,18 @@ class AccountServiceTest {
         String email = "test@test.com";
         String pw1 = "test1234!!";
         String pw2 = "test1234!!";
+        SetPasswordRequest request = SetPasswordRequest.builder()
+                .email(email)
+                .password1(pw1)
+                .password2(pw2)
+                .build();
 
         // mocking
         when(memberRepository.findByEmail(email)).thenReturn(Optional.of(MemberEntity.builder().build()));
         when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(Optional.of("true"));
 
         // when
-        boolean result = accountService.setNewPassword(email, pw1, pw2);
+        boolean result = accountService.setNewPassword(request);
 
         // then
         verify(memberRepository, times(1)).findByEmail(email);
@@ -187,6 +207,12 @@ class AccountServiceTest {
         // given
         String password = "test1234!!";
         String email = "test@test.com";
+        ChangePasswordRequest request = ChangePasswordRequest.builder()
+                .email(email)
+                .prevPassword(password)
+                .password1(newPW1)
+                .password2(newPW2)
+                .build();
 
         // mocking
         MemberEntity member = MemberEntity.builder().email(email).password(bCryptPasswordEncoder.encode(prevPW)).build();
@@ -196,9 +222,9 @@ class AccountServiceTest {
 
         // when & then
         if (isMemberExist) {
-            assertThrows(BadRequestException.class, () -> accountService.changePassword(email, password, newPW1, newPW2));
+            assertThrows(BadRequestException.class, () -> accountService.changePassword(request));
         } else {
-            assertThrows(NotFoundException.class, () -> accountService.changePassword(email, password, newPW1, newPW2));
+            assertThrows(NotFoundException.class, () -> accountService.changePassword(request));
         }
     }
 
@@ -210,6 +236,12 @@ class AccountServiceTest {
         String prevPW = "test1234!!";
         String newPW1 = "test123456!!";
         String newPW2 = "test123456!!";
+        ChangePasswordRequest request = ChangePasswordRequest.builder()
+                .email(email)
+                .prevPassword(prevPW)
+                .password1(newPW1)
+                .password2(newPW2)
+                .build();
 
         // mocking
         MemberEntity member = MemberEntity.builder().email(email).password(bCryptPasswordEncoder.encode(prevPW)).build();
@@ -218,7 +250,7 @@ class AccountServiceTest {
         when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(Optional.of("true"));
 
         // when
-        boolean result = accountService.changePassword(email, prevPW, newPW1, newPW2);
+        boolean result = accountService.changePassword(request);
 
         // then
         verify(memberRepository, times(1)).findByEmail(email);
@@ -266,6 +298,14 @@ class AccountServiceTest {
 
         // then
         assertThat(result).isInstanceOf(MemberInfoResponse.class);
+    }
+
+
+    @DisplayName("회원정보 수정 - 에러")
+    void setMemberInfoFail() { // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
+
+
+
     }
 
 }

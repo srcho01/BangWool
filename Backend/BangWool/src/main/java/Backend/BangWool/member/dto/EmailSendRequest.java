@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.util.Objects;
+
 @Getter
 @SuperBuilder
 @AllArgsConstructor
@@ -18,5 +20,12 @@ public class EmailSendRequest {
     @Email(message = "Email is out form")
     @NotEmpty(message = "Email is required")
     private String email;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EmailSendRequest request)) return false;
+        return Objects.equals(email, request.email);
+    }
 
 }

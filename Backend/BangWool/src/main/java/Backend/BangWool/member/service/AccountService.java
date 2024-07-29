@@ -3,7 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.MemberInfoResponse;
+import Backend.BangWool.member.dto.*;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
@@ -35,47 +35,49 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public boolean sendEmailForPassword(String email, String name, LocalDate birth) {
+    public boolean sendEmailForPassword(EmailSendForPasswordRequest request) {
 
-        MemberEntity member = memberRepository.findByEmailAndNameAndBirth(email, name, birth)
+        MemberEntity member = memberRepository.findByEmailAndNameAndBirth(request.getEmail(), request.getName(), request.getBirth())
                 .orElseThrow(() -> new NotFoundException("No users have that email, name and birth."));
 
-        emailService.sendEmail(member.getEmail());
+        emailService.sendEmail(EmailSendRequest.builder().email(member.getEmail()).build());
 
         return true;
     }
 
-    public boolean checkCodeForPassword(String email, String code) {
-        return emailService.checkCode(email, code);
+    public boolean checkCodeForPassword(EmailCheckRequest request) {
+
+        return emailService.checkCode(EmailCheckRequest.builder().email(request.getEmail()).code(request.getCode()).build());
+
     }
 
-    public boolean setNewPassword(String email, String pw1, String pw2) {
+    public boolean setNewPassword(SetPasswordRequest request) {
 
-        MemberEntity member = memberRepository.findByEmail(email)
+        MemberEntity member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        emailVerficationCheck(email);
-        passwordCheck(pw1, pw2);
+        emailVerficationCheck(request.getEmail());
+        passwordCheck(request.getPassword1(), request.getPassword2());
 
-        member.setPassword(bCryptPasswordEncoder.encode(pw1));
+        member.setPassword(bCryptPasswordEncoder.encode(request.getPassword1()));
         memberRepository.save(member);
 
         return true;
     }
 
-    public boolean changePassword(String email, String prevPassword, String newPassword1, String newPassword2) {
+    public boolean changePassword(ChangePasswordRequest request) {
 
-        MemberEntity member = memberRepository.findByEmail(email)
+        MemberEntity member = memberRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
-        if (!bCryptPasswordEncoder.matches(prevPassword, member.getPassword())) {
+        if (!bCryptPasswordEncoder.matches(request.getPrevPassword(), member.getPassword())) {
             throw new BadRequestException("The previous password does not match");
         }
 
-        emailVerficationCheck(email);
-        passwordCheck(newPassword1, newPassword2);
+        emailVerficationCheck(request.getEmail());
+        passwordCheck(request.getPassword1(), request.getPassword2());
 
-        member.setPassword(bCryptPasswordEncoder.encode(newPassword1));
+        member.setPassword(bCryptPasswordEncoder.encode(request.getPassword1()));
         memberRepository.save(member);
 
         return true;

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Schema(description = "Email Request DTO")
 @Getter
 @Builder
@@ -23,4 +25,11 @@ public class EmailCheckRequest {
     @Schema(example = "OF5W05")
     @NotEmpty(message = "Code is required")
     private String code;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof EmailCheckRequest request)) return false;
+        return Objects.equals(email, request.email) && Objects.equals(code, request.code);
+    }
 }
