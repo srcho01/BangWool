@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @OpenAPIDefinition(
-        info = @Info(title = "방울 API 명세서",
+        info = @Info(title = "방울 API 명세서", description = "token header 필요 없는 API : /auth/**, /login/**",
                 version = "v1"))
 @RequiredArgsConstructor
 @Configuration
