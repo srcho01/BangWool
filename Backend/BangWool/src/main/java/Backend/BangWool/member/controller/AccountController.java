@@ -1,5 +1,6 @@
 package Backend.BangWool.member.controller;
 
+import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.EmailCheckRequest;
 import Backend.BangWool.member.dto.EmailSendForPasswordRequest;
 import Backend.BangWool.member.dto.SetPasswordRequest;
@@ -50,6 +51,14 @@ public class AccountController {
     @PostMapping("/auth/lost/password/new")
     public StatusResponse setNewPassword(@Valid @RequestBody SetPasswordRequest dto) {
         if (accountService.setNewPassword(dto.getEmail(), dto.getPassword1(), dto.getPassword2()))
+            return StatusResponse.build(200);
+        return StatusResponse.build(500);
+    }
+    
+    @Operation(summary = "비밀번호 변경")
+    @PostMapping("/user/password/change")
+    public StatusResponse changePassword(@Valid @RequestBody ChangePasswordRequest dto) {
+        if (accountService.changePassword(dto.getEmail(), dto.getPrevPassword(), dto.getPassword1(), dto.getPassword2()))
             return StatusResponse.build(200);
         return StatusResponse.build(500);
     }
