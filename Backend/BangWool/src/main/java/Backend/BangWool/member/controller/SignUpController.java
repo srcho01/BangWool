@@ -26,24 +26,24 @@ public class SignUpController {
             @Parameter(description = "확인할 닉네임")
             @RequestParam String nickname) {
         if (signUpService.nicknameCheck(nickname))
-            return DataResponse.build(true);
-        return DataResponse.build(false);
+            return DataResponse.of(true);
+        return DataResponse.of(false);
     }
 
     @Operation(summary = "자체 회원가입")
     @PostMapping("local")
     public StatusResponse localSignUp(@Valid @RequestBody LocalSignUpRequest signUpRequestDto) {
         if (signUpService.localSignUp(signUpRequestDto))
-            return StatusResponse.build(200);
-        return StatusResponse.build(500);
+            return StatusResponse.of(200);
+        return StatusResponse.of(500);
     }
 
     @Operation(summary = "소셜 회원가입", description = "※ googleId와 kakaoId 둘 다 없으면 안됩니다 ※")
     @PostMapping("oauth")
     public StatusResponse socialSignUp(@Valid @RequestBody OAuthSignUpRequest signUpRequestDto) {
         if (signUpService.socialSignUp(signUpRequestDto))
-            return StatusResponse.build(200);
-        return StatusResponse.build(500);
+            return StatusResponse.of(200);
+        return StatusResponse.of(500);
     }
 
 }

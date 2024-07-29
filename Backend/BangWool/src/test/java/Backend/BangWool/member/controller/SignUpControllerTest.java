@@ -44,7 +44,7 @@ class SignUpControllerTest {
     @Test
     void nicknameCheckFail() throws Exception {
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, "Required parameter not found."));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
         mvc.perform(get("/auth/signup/nickname-check"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().json(responseJson));
@@ -62,7 +62,7 @@ class SignUpControllerTest {
         when(signUpService.nicknameCheck(nickname)).thenReturn(nicknameCheckReturn);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(nicknameCheckReturn));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(nicknameCheckReturn));
         mvc.perform(get("/auth/signup/nickname-check")
                         .param("nickname", nickname))
                 .andExpect(status().isOk())
@@ -132,7 +132,7 @@ class SignUpControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -156,7 +156,7 @@ class SignUpControllerTest {
         when(signUpService.localSignUp(any(LocalSignUpRequest.class))).thenReturn(true);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -219,7 +219,7 @@ class SignUpControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/signup/oauth")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -245,7 +245,7 @@ class SignUpControllerTest {
         when(signUpService.socialSignUp(any(OAuthSignUpRequest.class))).thenReturn(true);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/auth/signup/oauth")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))

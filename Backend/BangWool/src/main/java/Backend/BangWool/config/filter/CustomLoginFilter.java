@@ -91,7 +91,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 응답 구성하기 (헤더, 바디)
         TokenResponse tokenDto = new TokenResponse(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
-        DataResponse<TokenResponse> tokenBody = DataResponse.build(tokenDto);
+        DataResponse<TokenResponse> tokenBody = DataResponse.of(tokenDto);
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonResponse = objectMapper.writeValueAsString(tokenBody);
 

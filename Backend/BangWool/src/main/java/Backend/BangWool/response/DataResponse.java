@@ -12,7 +12,7 @@ public class DataResponse<T> extends ResponseDTO {
         this.data = data;
     }
 
-    public static <T> DataResponse<T> build(T data) {
+    public static <T> DataResponse<T> of(T data) {
         return new DataResponse<>(data);
     }
 }

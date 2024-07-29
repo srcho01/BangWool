@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<StatusResponse> handleBadRequest(BadRequestException e) {
-        StatusResponse response = StatusResponse.build(400, e);
+        StatusResponse response = StatusResponse.of(400, e);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -26,15 +26,8 @@ public class GlobalExceptionHandler {
         String errorMessage = e.getBindingResult().getAllErrors().isEmpty() ?
                 "Invalid arguments" :
                 e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
-        StatusResponse response = StatusResponse.build(400, errorMessage);
+        StatusResponse response = StatusResponse.of(400, errorMessage);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    private String extractErrorMessage(MethodArgumentTypeMismatchException ex) {
-        String parameterName = ex.getName();
-        String parameterType = ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown";
-        String value = ex.getValue() != null ? ex.getValue().toString() : "null";
-        return String.format("Parameter '%s' with value '%s' could not be converted to type '%s'", parameterName, value, parameterType);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -44,43 +37,43 @@ public class GlobalExceptionHandler {
         String value = e.getValue() != null ? e.getValue().toString() : "null";
         String message = String.format("Parameter '%s' with value '%s' could not be converted to type '%s'", parameterName, value, parameterType);
 
-        StatusResponse response = StatusResponse.build(400, message);
+        StatusResponse response = StatusResponse.of(400, message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<StatusResponse> handleMissingParam(MissingServletRequestParameterException e) {
-        StatusResponse response = StatusResponse.build(400, "Required parameter not found.");
+        StatusResponse response = StatusResponse.of(400, "Required parameter not found.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<StatusResponse> handleMessageNotReadable(HttpMessageNotReadableException e) {
-        StatusResponse response = StatusResponse.build(400, "Message format is incorrect.");
+        StatusResponse response = StatusResponse.of(400, "Message format is incorrect.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<StatusResponse> handleNotFound(NotFoundException e) {
-        StatusResponse response = StatusResponse.build(404, e);
+        StatusResponse response = StatusResponse.of(404, e);
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<StatusResponse> handleServer(ServerException e) {
-        StatusResponse response = StatusResponse.build(500, e);
+        StatusResponse response = StatusResponse.of(500, e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<StatusResponse> handleRuntime(RuntimeException e) {
-        StatusResponse response = StatusResponse.build(500, e);
+        StatusResponse response = StatusResponse.of(500, e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     @ExceptionHandler(ConnectException.class)
     public ResponseEntity<StatusResponse> handleConnect(ConnectException e) {
-        StatusResponse response = StatusResponse.build(500, "Access to database has been denied");
+        StatusResponse response = StatusResponse.of(500, "Access to database has been denied");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 

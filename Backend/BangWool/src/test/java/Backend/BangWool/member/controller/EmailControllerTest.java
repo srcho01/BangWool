@@ -49,7 +49,7 @@ class EmailControllerTest {
         doNothing().when(emailService).sendEmail(request.getEmail());
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(200));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
         mvc.perform(post("/auth/email/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -79,7 +79,7 @@ class EmailControllerTest {
         doNothing().when(emailService).sendEmail(request.getEmail());
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/email/send")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -101,7 +101,7 @@ class EmailControllerTest {
         when(emailService.checkCode(request.getEmail(), request.getCode())).thenReturn(true);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(true));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(true));
         System.out.println(responseJson);
         mvc.perform(post("/auth/email/check")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,7 +125,7 @@ class EmailControllerTest {
         when(emailService.checkCode(request.getEmail(), request.getCode())).thenReturn(false);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.build(false));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(false));
         System.out.println(responseJson);
         mvc.perform(post("/auth/email/check")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -158,7 +158,7 @@ class EmailControllerTest {
         when(emailService.checkCode(request.getEmail(), request.getCode())).thenReturn(false);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, message));
         mvc.perform(post("/auth/email/check")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))

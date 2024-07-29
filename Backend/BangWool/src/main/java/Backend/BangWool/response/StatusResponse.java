@@ -25,28 +25,28 @@ public class StatusResponse extends ResponseDTO {
 
 
 
-    public static StatusResponse build(StatusCode statusCode) {
+    public static StatusResponse of(StatusCode statusCode) {
         return new StatusResponse(statusCode);
     }
 
-    public static StatusResponse build(StatusCode statusCode, Exception e) {
+    public static StatusResponse of(StatusCode statusCode, Exception e) {
         return new StatusResponse(statusCode, e);
     }
 
-    public static StatusResponse build(StatusCode statusCode, String message) {
+    public static StatusResponse of(StatusCode statusCode, String message) {
         return new StatusResponse(statusCode, message);
     }
 
 
-    public static StatusResponse build(int numCode) {
+    public static StatusResponse of(int numCode) {
         return new StatusResponse(codeMap.get(numCode));
     }
 
-    public static StatusResponse build(int numCode, Exception e) {
+    public static StatusResponse of(int numCode, Exception e) {
         return new StatusResponse(codeMap.get(numCode), e);
     }
 
-    public static StatusResponse build(int numCode, String message) {
+    public static StatusResponse of(int numCode, String message) {
         return new StatusResponse(codeMap.get(numCode), message);
     }
 

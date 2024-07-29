@@ -89,7 +89,7 @@ public class TokenController {
 
         // 새 토큰 응답
         TokenResponse newToken = new TokenResponse(access, CONSTANT.ACCESS_EXPIRED, refresh, CONSTANT.REFRESH_EXPIRED);
-        return DataResponse.build(newToken);
+        return DataResponse.of(newToken);
     }
 
 }

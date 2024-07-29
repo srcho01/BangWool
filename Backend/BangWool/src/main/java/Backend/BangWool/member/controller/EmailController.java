@@ -26,7 +26,7 @@ public class EmailController {
     @PostMapping("send")
     public StatusResponse mailSend(@Valid @RequestBody EmailSendRequest sendDto) {
         emailService.sendEmail(sendDto.getEmail());
-        return StatusResponse.build(200);
+        return StatusResponse.of(200);
     }
 
 
@@ -34,7 +34,7 @@ public class EmailController {
     @PostMapping("check")
     public DataResponse<Boolean> mailCheck(@Valid @RequestBody EmailCheckRequest checkDto) {
         if (emailService.checkCode(checkDto.getEmail(), checkDto.getCode()))
-            return DataResponse.build(true);
-        return DataResponse.build(false);
+            return DataResponse.of(true);
+        return DataResponse.of(false);
     }
 }
