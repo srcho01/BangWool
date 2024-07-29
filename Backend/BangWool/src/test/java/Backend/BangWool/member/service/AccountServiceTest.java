@@ -118,11 +118,11 @@ class AccountServiceTest {
 
     private static Stream<Arguments> invalidSetPassword() {
         return Stream.of(
-                Arguments.of(false, false, "test1234!!", "test1234!!"),
-                Arguments.of(true, false, "test1234!!", "test1234!!"),
-                Arguments.of(true, true, "test1234!!", "different"),
-                Arguments.of(true, true, "test!!", "test!!"),
-                Arguments.of(true, true, "test0!", "test0!")
+                Arguments.of(false, false, "test1234!!", "test1234!!"), // 유저 없음
+                Arguments.of(true, false, "test1234!!", "test1234!!"), // email 확인 미완료
+                Arguments.of(true, true, "test1234!!", "different"), // 비밀번호 다름
+                Arguments.of(true, true, "test!!", "test!!"), // 비밀번호 조건 부합 X
+                Arguments.of(true, true, "test0!", "test0!") // 비밀번호 짧음
         );
     }
 
@@ -170,7 +170,7 @@ class AccountServiceTest {
         return Stream.of(
                 Arguments.of(false, false, "test1234!!", "test1234!!", "test1234!!"),
                 Arguments.of(true, false, "test1234!!", "test1234!!", "test1234!!"),
-                Arguments.of(true, true, "test1234@@", "test1234!!", "test1234!!"),
+                Arguments.of(true, true, "test1234@@", "test1234!!", "test1234!!"), // 이전 비밀번호 불일치
                 Arguments.of(true, true, "test1234!!", "test1234!!", "different"),
                 Arguments.of(true, true, "test1234!!", "test!!", "test!!"),
                 Arguments.of(true, true, "test1234!!", "test0!", "test0!")

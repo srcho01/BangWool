@@ -3,6 +3,7 @@ package Backend.BangWool.member.controller;
 import Backend.BangWool.config.TestSecurityConfig;
 import Backend.BangWool.member.dto.EmailCheckRequest;
 import Backend.BangWool.member.dto.EmailSendForPasswordRequest;
+import Backend.BangWool.member.dto.SetPasswordRequest;
 import Backend.BangWool.member.service.AccountService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
@@ -42,7 +43,8 @@ public class AccountControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @DisplayName("아이디 찾기 - 실패")
+
+    @DisplayName("아이디 찾기 - 에러")
     @Test
     void findEmailFail() throws Exception {
         // then
@@ -85,6 +87,7 @@ public class AccountControllerTest {
                 .andExpect(content().json(responseJson));
     }
 
+
     private static Stream<Arguments> invalidSendEmail() {
         return Stream.of(
                 Arguments.of(null, "test", LocalDate.of(2000, 5, 25)),
@@ -93,7 +96,7 @@ public class AccountControllerTest {
         );
     }
 
-    @DisplayName("비밀번호 찾기 이메일 전송 - 실패")
+    @DisplayName("비밀번호 찾기 이메일 전송 - 에러")
     @ParameterizedTest
     @MethodSource("invalidSendEmail")
     void sendEmailFail(String email, String name, LocalDate birth) throws Exception {
@@ -189,6 +192,64 @@ public class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
 
+    }
+
+
+    private static Stream<Arguments> invalidSetNewPassword() {
+        return Stream.of(
+                Arguments.of(null, "test1234!!", "test1234!!", "Email is required"),
+                Arguments.of("test", "test1234!!", "test1234!!", "Email is out form"),
+                Arguments.of("test@test.com", null, "test1234!!", "password is Required"),
+                Arguments.of("test@test.com", "test1234!!", null, "password confirmation is Required")
+        );
+    }
+
+    @DisplayName("비밀번호 찾기 새 비밀번호 설정 - 에러")
+    @ParameterizedTest
+    @MethodSource("invalidSetNewPassword")
+    void setNewPasswordFail(String email, String pw1, String pw2, String message) throws Exception {
+        // given
+        SetPasswordRequest request = SetPasswordRequest.builder()
+                .email(email)
+                .password1(pw1)
+                .password2(pw2)
+                .build();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        // then
+        String response = objectMapper.writeValueAsString(StatusResponse.build(400, message));
+        mvc.perform(post("/auth/lost/password/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(response));
+    }
+
+    @DisplayName("비밀번호 찾기 새 비밀번호 설정 - 성공")
+    @Test
+    void setNewPasswordSuccess() throws Exception {
+        // given
+        String email = "test@test.com";
+        String pw1 = "test1234!!";
+        String pw2 = "test1234!!";
+
+        SetPasswordRequest request = SetPasswordRequest.builder()
+                .email(email)
+                .password1(pw1)
+                .password2(pw2)
+                .build();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        // mocking
+        when(accountService.setNewPassword(email, pw1, pw2)).thenReturn(true);
+
+        // then
+        String response = objectMapper.writeValueAsString(StatusResponse.build(200));
+        mvc.perform(post("/auth/lost/password/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(response));
     }
 
 
