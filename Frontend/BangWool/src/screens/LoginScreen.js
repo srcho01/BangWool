@@ -1,16 +1,58 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { serverUrl } from '@env';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isChecked, setIsChecked] = useState(false);
-
-  const handleLogin = () => {
-    // 로그인 로직 추가
-    console.log('Login button pressed');
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Validation Error', 'Please enter both email and password');
+      return;
+    }
+  
+    const payload = {
+      email,
+      password,
+    };
+  
+    try {
+      console.log('Sending login request with payload:', payload);
+  
+      const response = await fetch(`${serverUrl}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      // 응답 상태 코드 확인
+      if (!response.ok) {
+        const errorDetails = await response.text(); // 응답 본문을 텍스트로 읽어봅니다
+        console.error(`Login failed. Status: ${response.status}, Details: ${errorDetails}`);
+        Alert.alert('Login Error', errorDetails || 'An error occurred');
+        return;
+      }
+  
+      // 응답 본문을 JSON으로 파싱합니다
+      const data = await response.json();
+      console.log('Login successful:', data);
+  
+      // 로그인 성공 처리
+      // 예를 들어, AsyncStorage에 토큰 저장 및 다음 화면으로 이동
+      // await AsyncStorage.setItem('accessToken', data.data.accessToken);
+      // await AsyncStorage.setItem('refreshToken', data.data.refreshToken);
+      // navigation.navigate('Home'); // 'Home'을 원하는 화면으로 변경하세요
+  
+    } catch (error) {
+      console.error('Error during login:', error.message);
+      Alert.alert('Login Error', 'An unexpected error occurred');
+    }
   };
+  
 
   const toggleCheckbox = () => {
     setIsChecked(!isChecked);
@@ -26,7 +68,7 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.inputLabel}>이메일</Text>
           <TextInput
             style={styles.input}
-            placeholder="user@example.com"
+            placeholder="ex) user@example.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
