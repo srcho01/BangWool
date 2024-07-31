@@ -33,10 +33,10 @@ class EmailServiceTest {
     @Autowired
     private EmailService emailService;
 
-    
+
     @Test
     @DisplayName("이메일 전송 - 성공")
-    void sendEmail() throws Exception {
+    void sendEmail() {
         // given
         String email = "test@test.com";
         EmailSendRequest request = EmailSendRequest.builder().email(email).build();
