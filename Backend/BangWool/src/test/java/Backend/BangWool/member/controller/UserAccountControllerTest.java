@@ -2,7 +2,7 @@ package Backend.BangWool.member.controller;
 
 import Backend.BangWool.config.TestSecurityConfig;
 import Backend.BangWool.member.dto.*;
-import Backend.BangWool.member.service.AccountService;
+import Backend.BangWool.member.service.UserAccountService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,12 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {AccountController.class})
+@WebMvcTest(controllers = {UserAccountController.class})
 @ContextConfiguration(classes = TestSecurityConfig.class)
-public class AccountControllerTest {
+public class UserAccountControllerTest {
 
     @MockBean
-    private AccountService accountService;
+    private UserAccountService userAccountService;
 
     @Autowired
     private MockMvc mvc;
@@ -61,7 +61,7 @@ public class AccountControllerTest {
         String nickname = "test";
 
         // when
-        when(accountService.nicknameCheck(nickname)).thenReturn(nicknameCheckReturn);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(nicknameCheckReturn);
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(nicknameCheckReturn));
@@ -103,7 +103,7 @@ public class AccountControllerTest {
         LocalDate birth = LocalDate.of(2000, 9, 12);
 
         // when
-        when(accountService.findEmail(name, birth)).thenReturn(email);
+        when(userAccountService.findEmail(name, birth)).thenReturn(email);
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(email));
@@ -156,7 +156,7 @@ public class AccountControllerTest {
         String request = objectMapper.writeValueAsString(dto);
 
         // when
-        when(accountService.sendEmailForPassword(dto)).thenReturn(true);
+        when(userAccountService.sendEmailForPassword(dto)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));
@@ -209,7 +209,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // when
-        when(accountService.checkCodeForPassword(request)).thenReturn(isMatch);
+        when(userAccountService.checkCodeForPassword(request)).thenReturn(isMatch);
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(isMatch));
@@ -269,7 +269,7 @@ public class AccountControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // mocking
-        when(accountService.setNewPassword(request)).thenReturn(true);
+        when(userAccountService.setNewPassword(request)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));
@@ -278,103 +278,6 @@ public class AccountControllerTest {
                         .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().json(response));
-    }
-
-
-    private static Stream<Arguments> invalidChangePassword() {
-        return Stream.of(
-                Arguments.of(null, "prev1234!!", "test1234!!", "test1234!!", "Email is required"),
-                Arguments.of("test", "prev1234!!", "test1234!!", "test1234!!", "Email is out form"),
-                Arguments.of("test@test.com", null, "test1234!!", "test1234!!", "previous password is Required"),
-                Arguments.of("test@test.com", "prev1234!!", null, "test1234!!", "password is Required"),
-                Arguments.of("test@test.com", "prev1234!!", "test1234!!", null, "password confirmation is Required")
-        );
-    }
-
-    @DisplayName("비밀번호 변경 - 에러")
-    @ParameterizedTest
-    @MethodSource("invalidChangePassword")
-    void changePasswordFail(String email, String prev, String pw1, String pw2, String message) throws Exception {
-        // given
-        ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
-                .prevPassword(prev)
-                .password1(pw1)
-                .password2(pw2)
-                .build();
-        String requestJson = objectMapper.writeValueAsString(request);
-
-        // then
-        String response = objectMapper.writeValueAsString(StatusResponse.of(400, message));
-        mvc.perform(post("/user/password/change")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(response));
-    }
-
-    @DisplayName("비밀번호 변경 - 성공")
-    @Test
-    void changePasswordSuccess() throws Exception {
-        // given
-        String email = "test@test.com";
-        String prev = "prev1234!!";
-        String pw1 = "test1234!!";
-        String pw2 = "test1234!!";
-
-        ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
-                .prevPassword(prev)
-                .password1(pw1)
-                .password2(pw2)
-                .build();
-        String requestJson = objectMapper.writeValueAsString(request);
-
-        // mocking
-        when(accountService.changePassword(request)).thenReturn(true);
-
-        // then
-        String response = objectMapper.writeValueAsString(StatusResponse.of(200));
-        mvc.perform(post("/user/password/change")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestJson))
-                .andExpect(status().isOk())
-                .andExpect(content().json(response));
-    }
-
-
-    @DisplayName("회원정보 조회 - 에러")
-    @Test
-    void getMemberInfoFail() throws Exception {
-        // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
-
-        mvc.perform(get("/user/info"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(responseJson));
-    }
-
-    @DisplayName("회원정보 조회 - 성공")
-    @Test
-    void getMemberInfoSuccess() throws Exception {
-        // given
-        String email = "test@test.com";
-
-        // when
-        MemberInfoResponse response = MemberInfoResponse.builder()
-                        .email(email)
-                        .name("test")
-                        .nickname("test")
-                        .birth(LocalDate.of(2000, 1, 1))
-                        .build();
-        when(accountService.getMemberInfo(email)).thenReturn(response);
-
-        // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
-        mvc.perform(get("/user/info")
-                        .param("email", email))
-                .andExpect(status().isOk())
-                .andExpect(content().json(responseJson));
     }
 
 }

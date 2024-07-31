@@ -19,7 +19,7 @@ public class SignUpService {
     private final MemberRepository memberRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final RedisUtil redisUtil;
-    private final AccountService accountService;
+    private final UserAccountService userAccountService;
 
     @Transactional
     public boolean localSignUp(LocalSignUpRequest data) {
@@ -29,11 +29,11 @@ public class SignUpService {
             throw new BadRequestException("User is already registered.");
 
         // 이메일 인증 체크
-        accountService.emailVerficationCheck(data.getEmail());
+        userAccountService.emailVerficationCheck(data.getEmail());
         // password 체크
-        accountService.passwordCheck(data.getPassword1(), data.getPassword2());
+        userAccountService.passwordCheck(data.getPassword1(), data.getPassword2());
         // nickname 체크
-        accountService.nicknameCheck(data.getNickname());
+        userAccountService.nicknameCheck(data.getNickname());
 
         // entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
@@ -62,7 +62,7 @@ public class SignUpService {
             throw new BadRequestException("User is already registered.");
 
         // nickname 체크
-        accountService.nicknameCheck(data.getNickname());
+        userAccountService.nicknameCheck(data.getNickname());
 
         // social id 체크
         String googleId = data.getGoogleId();

@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class AccountServiceTest {
+class UserAccountServiceTest {
 
     @MockBean
     private MemberRepository memberRepository;
@@ -42,7 +42,7 @@ class AccountServiceTest {
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Autowired
-    AccountService accountService;
+    UserAccountService userAccountService;
 
 
     @DisplayName("닉네임 확인 - 실패 : 닉네임 조건 미충족")
@@ -50,7 +50,7 @@ class AccountServiceTest {
     @ValueSource(strings = {"!@#$", "닉네임이너무길어123456"})
     void nicknameCheckFail(String nickname) {
         // when & then
-        BadRequestException e = assertThrows(BadRequestException.class, () -> accountService.nicknameCheck(nickname));
+        BadRequestException e = assertThrows(BadRequestException.class, () -> userAccountService.nicknameCheck(nickname));
         assertThat(e.getMessage()).isEqualTo("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
     }
 
@@ -64,7 +64,7 @@ class AccountServiceTest {
         when(memberRepository.existsByNickname(nickname)).thenReturn(true);
 
         // when & then
-        BadRequestException e = assertThrows(BadRequestException.class, () -> accountService.nicknameCheck(nickname));
+        BadRequestException e = assertThrows(BadRequestException.class, () -> userAccountService.nicknameCheck(nickname));
         assertThat(e.getMessage()).isEqualTo("Nickname is already existed.");
     }
 
@@ -80,7 +80,7 @@ class AccountServiceTest {
         when(memberRepository.findByNameAndBirth(name, birth)).thenReturn(Optional.empty());
 
         // when & then
-        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.findEmail(name, birth));
+        NotFoundException e = assertThrows(NotFoundException.class, () -> userAccountService.findEmail(name, birth));
         assertThat(e.getMessage()).isEqualTo("No users have that name and birth.");
     }
 
@@ -97,7 +97,7 @@ class AccountServiceTest {
         when(memberRepository.findByNameAndBirth(name, birth)).thenReturn(Optional.ofNullable(member));
 
         // when
-        String result = accountService.findEmail(name, birth);
+        String result = userAccountService.findEmail(name, birth);
 
         // then
         assertThat(result).isEqualTo(email);
@@ -121,7 +121,7 @@ class AccountServiceTest {
         when(memberRepository.findByEmailAndNameAndBirth(email, name, birth)).thenReturn(Optional.empty());
 
         // when & then
-        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.sendEmailForPassword(request));
+        NotFoundException e = assertThrows(NotFoundException.class, () -> userAccountService.sendEmailForPassword(request));
         assertThat(e.getMessage()).isEqualTo("No users have that email, name and birth.");
     }
 
@@ -144,7 +144,7 @@ class AccountServiceTest {
         doNothing().when(emailService).sendEmail(EmailSendRequest.builder().email(email).build());
 
         // when
-        boolean result = accountService.sendEmailForPassword(request);
+        boolean result = userAccountService.sendEmailForPassword(request);
 
         // then
         verify(memberRepository, times(1)).findByEmailAndNameAndBirth(email, name, birth);
@@ -181,9 +181,9 @@ class AccountServiceTest {
 
         // when & then
         if (isMemberExist) {
-            assertThrows(BadRequestException.class, () -> accountService.setNewPassword(request));
+            assertThrows(BadRequestException.class, () -> userAccountService.setNewPassword(request));
         } else {
-            assertThrows(NotFoundException.class, () -> accountService.setNewPassword(request));
+            assertThrows(NotFoundException.class, () -> userAccountService.setNewPassword(request));
         }
     }
 
@@ -205,124 +205,12 @@ class AccountServiceTest {
         when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(Optional.of("true"));
 
         // when
-        boolean result = accountService.setNewPassword(request);
+        boolean result = userAccountService.setNewPassword(request);
 
         // then
         verify(memberRepository, times(1)).findByEmail(email);
         verify(memberRepository, times(1)).save(any(MemberEntity.class));
         assertThat(result).isEqualTo(true);
-    }
-
-
-    private static Stream<Arguments> invalidChangePassword() {
-        return Stream.of(
-                Arguments.of(false, false, "test1234!!", "test1234!!", "test1234!!"),
-                Arguments.of(true, false, "test1234!!", "test1234!!", "test1234!!"),
-                Arguments.of(true, true, "test1234@@", "test1234!!", "test1234!!"), // 이전 비밀번호 불일치
-                Arguments.of(true, true, "test1234!!", "test1234!!", "different"),
-                Arguments.of(true, true, "test1234!!", "test!!", "test!!"),
-                Arguments.of(true, true, "test1234!!", "test0!", "test0!")
-        );
-    }
-
-    @DisplayName("비밀번호 변경 - 실패")
-    @ParameterizedTest
-    @MethodSource("invalidChangePassword")
-    void changePasswordFail(boolean isMemberExist, boolean isVerify, String prevPW, String newPW1, String newPW2) {
-        // given
-        String password = "test1234!!";
-        String email = "test@test.com";
-        ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
-                .prevPassword(password)
-                .password1(newPW1)
-                .password2(newPW2)
-                .build();
-
-        // mocking
-        MemberEntity member = MemberEntity.builder().email(email).password(bCryptPasswordEncoder.encode(prevPW)).build();
-
-        when(memberRepository.findByEmail(email)).thenReturn(isMemberExist ? Optional.of(member) : Optional.empty());
-        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(isVerify ? Optional.of("true") : Optional.empty());
-
-        // when & then
-        if (isMemberExist) {
-            assertThrows(BadRequestException.class, () -> accountService.changePassword(request));
-        } else {
-            assertThrows(NotFoundException.class, () -> accountService.changePassword(request));
-        }
-    }
-
-    @DisplayName("비밀번호 변경 - 성공")
-    @Test
-    void changePasswordSuccess() {
-        // given
-        String email = "test@test.com";
-        String prevPW = "test1234!!";
-        String newPW1 = "test123456!!";
-        String newPW2 = "test123456!!";
-        ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
-                .prevPassword(prevPW)
-                .password1(newPW1)
-                .password2(newPW2)
-                .build();
-
-        // mocking
-        MemberEntity member = MemberEntity.builder().email(email).password(bCryptPasswordEncoder.encode(prevPW)).build();
-
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-        when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(Optional.of("true"));
-
-        // when
-        boolean result = accountService.changePassword(request);
-
-        // then
-        verify(memberRepository, times(1)).findByEmail(email);
-        verify(memberRepository, times(1)).save(any(MemberEntity.class));
-
-        assertThat(result).isEqualTo(true);
-
-    }
-
-
-    @DisplayName("회원정보 조회 - 실패 : 없는 유저")
-    @Test
-    void getMemberInfoFail() {
-        // given
-        String email = "test@test.com";
-
-        // mocking
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
-
-        // when & then
-        NotFoundException e = assertThrows(NotFoundException.class, () -> accountService.getMemberInfo(email));
-        assertThat(e.getMessage()).isEqualTo("User not found");
-    }
-
-    @DisplayName("회원정보 조회 - 성공")
-    @Test
-    void getMemberInfoSuccess() {
-        // given
-        String email = "test@test.com";
-
-        // mocking
-        MemberEntity member = MemberEntity.builder()
-                .email(email)
-                .password("1234")
-                .name("test")
-                .nickname("test")
-                .birth(LocalDate.of(2000, 1, 1))
-                .googleId("anfiuownen")
-                .kakaoId("12198964732")
-                .build();
-        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
-
-        // when
-        MemberInfoResponse result = accountService.getMemberInfo(email);
-
-        // then
-        assertThat(result).isInstanceOf(MemberInfoResponse.class);
     }
 
 }

@@ -3,7 +3,6 @@ package Backend.BangWool.member.controller;
 import Backend.BangWool.config.TestSecurityConfig;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
-import Backend.BangWool.member.service.AccountService;
 import Backend.BangWool.member.service.SignUpService;
 import Backend.BangWool.response.StatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,9 +33,6 @@ class SignUpControllerTest {
 
     @MockBean
     private SignUpService signUpService;
-
-    @MockBean
-    private AccountService accountService;
 
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;

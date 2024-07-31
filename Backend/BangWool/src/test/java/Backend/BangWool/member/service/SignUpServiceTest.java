@@ -31,7 +31,7 @@ class SignUpServiceTest {
     private RedisUtil redisUtill;
 
     @MockBean
-    private AccountService accountService;
+    private UserAccountService userAccountService;
 
     @Autowired
     private SignUpService signUpService;
@@ -57,9 +57,9 @@ class SignUpServiceTest {
 
         // mocking
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(true);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
-        doNothing().when(accountService).passwordCheck(pw1, pw2);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
+        doNothing().when(userAccountService).passwordCheck(pw1, pw2);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
 
         // when & then
         assertThrows(BadRequestException.class, () -> signUpService.localSignUp(request));
@@ -86,9 +86,9 @@ class SignUpServiceTest {
 
         // mocking
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(false);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
-        doNothing().when(accountService).passwordCheck(pw1, pw2);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
+        doNothing().when(userAccountService).passwordCheck(pw1, pw2);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
 
         // when
         signUpService.localSignUp(request);
@@ -128,7 +128,7 @@ class SignUpServiceTest {
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(memberRepository.existsByGoogleId(request.getGoogleId())).thenReturn(googleExist);
         when(memberRepository.existsByKakaoId(request.getKakaoId())).thenReturn(kakaoExist);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
 
         // when & then
         assertThrows(BadRequestException.class, () -> signUpService.socialSignUp(request));
@@ -164,7 +164,7 @@ class SignUpServiceTest {
         when(memberRepository.existsByEmail(request.getEmail())).thenReturn(false);
         when(memberRepository.existsByGoogleId(request.getGoogleId())).thenReturn(googleExist);
         when(memberRepository.existsByKakaoId(request.getKakaoId())).thenReturn(kakaoExist);
-        when(accountService.nicknameCheck(nickname)).thenReturn(true);
+        when(userAccountService.nicknameCheck(nickname)).thenReturn(true);
 
         // when
         signUpService.socialSignUp(request);

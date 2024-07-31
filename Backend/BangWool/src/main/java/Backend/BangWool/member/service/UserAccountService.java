@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class AccountService {
+public class UserAccountService {
 
     private final MemberRepository memberRepository;
     private final EmailService emailService;
@@ -79,40 +79,6 @@ public class AccountService {
         memberRepository.save(member);
 
         return true;
-    }
-
-    public boolean changePassword(ChangePasswordRequest request) {
-
-        MemberEntity member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        if (!bCryptPasswordEncoder.matches(request.getPrevPassword(), member.getPassword())) {
-            throw new BadRequestException("The previous password does not match");
-        }
-
-        emailVerficationCheck(request.getEmail());
-        passwordCheck(request.getPassword1(), request.getPassword2());
-
-        member.setPassword(bCryptPasswordEncoder.encode(request.getPassword1()));
-        memberRepository.save(member);
-
-        return true;
-    }
-
-    public MemberInfoResponse getMemberInfo(String email) {
-
-        MemberEntity member = memberRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        return MemberInfoResponse.builder()
-                .memberID(member.getMemberID())
-                .email(member.getEmail())
-                .name(member.getName())
-                .nickname(member.getNickname())
-                .birth(member.getBirth())
-                .googleId(member.getGoogleId())
-                .kakaoId((member.getKakaoId()))
-                .build();
     }
 
 
