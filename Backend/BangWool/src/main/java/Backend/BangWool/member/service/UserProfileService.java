@@ -3,7 +3,6 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.ChangeMemberInfo;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.repository.MemberRepository;
@@ -52,23 +51,6 @@ public class UserProfileService {
                 .googleId(member.getGoogleId())
                 .kakaoId((member.getKakaoId()))
                 .build();
-    }
-
-    public void setMemberInfo(ChangeMemberInfo request) {
-
-        if (request.getGoogleId() == null && request.getKakaoId() == null) {
-            throw new BadRequestException("Member signed up for social membership cannot disconnect all social connections.");
-        }
-
-        MemberEntity member = memberRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new NotFoundException("User not found"));
-
-        member.setNickname(request.getNickname());
-        member.setGoogleId(request.getGoogleId());
-        member.setKakaoId(request.getKakaoId());
-
-        memberRepository.save(member);
-
     }
 
 }
