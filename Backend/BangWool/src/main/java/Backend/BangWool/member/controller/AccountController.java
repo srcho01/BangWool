@@ -20,6 +20,16 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @Operation(summary = "닉네임 확인", description = "사용 가능하면 true, 이미 존재하면 false")
+    @GetMapping("/auth/nickname-check")
+    public DataResponse<Boolean> nicknameCheck(
+            @Parameter(description = "확인할 닉네임")
+            @RequestParam String nickname) {
+        if (accountService.nicknameCheck(nickname))
+            return DataResponse.of(true);
+        return DataResponse.of(false);
+    }
+
     @Operation(summary = "아이디 찾기")
     @GetMapping("/auth/lost/id")
     public DataResponse<String> findEmail(@RequestParam String name,

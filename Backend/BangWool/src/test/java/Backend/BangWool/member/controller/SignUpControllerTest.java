@@ -3,8 +3,8 @@ package Backend.BangWool.member.controller;
 import Backend.BangWool.config.TestSecurityConfig;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
+import Backend.BangWool.member.service.AccountService;
 import Backend.BangWool.member.service.SignUpService;
-import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,7 +24,6 @@ import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,38 +35,12 @@ class SignUpControllerTest {
     @MockBean
     private SignUpService signUpService;
 
+    @MockBean
+    private AccountService accountService;
+
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @DisplayName("닉네임 확인 - 실패 : 닉네임 null")
-    @Test
-    void nicknameCheckFail() throws Exception {
-        // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
-        mvc.perform(get("/auth/signup/nickname-check"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(responseJson));
-
-    }
-
-    @DisplayName("닉네임 확인 - 성공")
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void nicknameCheckSuccess(boolean nicknameCheckReturn) throws Exception {
-        // given
-        String nickname = "test";
-
-        // when
-        when(signUpService.nicknameCheck(nickname)).thenReturn(nicknameCheckReturn);
-
-        // then
-        String responseJson = objectMapper.writeValueAsString(DataResponse.of(nicknameCheckReturn));
-        mvc.perform(get("/auth/signup/nickname-check")
-                        .param("nickname", nickname))
-                .andExpect(status().isOk())
-                .andExpect(content().json(responseJson));
-
-    }
 
     private static Stream<Arguments> invalidLocalSignUp() {
         return Stream.of(

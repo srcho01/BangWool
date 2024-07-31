@@ -42,6 +42,36 @@ public class AccountControllerTest {
     private ObjectMapper objectMapper;
 
 
+    @DisplayName("닉네임 확인 - 실패 : 닉네임 null")
+    @Test
+    void nicknameCheckFail() throws Exception {
+        // then
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
+        mvc.perform(get("/auth/nickname-check"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(responseJson));
+
+    }
+
+    @DisplayName("닉네임 확인 - 성공")
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void nicknameCheckSuccess(boolean nicknameCheckReturn) throws Exception {
+        // given
+        String nickname = "test";
+
+        // when
+        when(accountService.nicknameCheck(nickname)).thenReturn(nicknameCheckReturn);
+
+        // then
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(nicknameCheckReturn));
+        mvc.perform(get("/auth/nickname-check")
+                        .param("nickname", nickname))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+
+    }
+
     @DisplayName("아이디 찾기 - 에러")
     @Test
     void findEmailFail() throws Exception {

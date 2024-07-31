@@ -12,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @Service
 @RequiredArgsConstructor
 public class SignUpService {
@@ -31,14 +28,12 @@ public class SignUpService {
         if (memberRepository.existsByEmail(data.getEmail()))
             throw new BadRequestException("User is already registered.");
 
+        // 이메일 인증 체크
+        accountService.emailVerficationCheck(data.getEmail());
         // password 체크
         accountService.passwordCheck(data.getPassword1(), data.getPassword2());
-
         // nickname 체크
-        nicknameCheck(data.getNickname());
-
-        // Check email verification
-        accountService.emailVerficationCheck(data.getEmail());
+        accountService.nicknameCheck(data.getNickname());
 
         // entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
@@ -67,18 +62,12 @@ public class SignUpService {
             throw new BadRequestException("User is already registered.");
 
         // nickname 체크
-        nicknameCheck(data.getNickname());
+        accountService.nicknameCheck(data.getNickname());
 
+        // social id 체크
         String googleId = data.getGoogleId();
         String kakaoId = data.getKakaoId();
-
-        // google, kakao ID 둘 다 없으면 Error
-        if (googleId == null && kakaoId == null)
-            throw new BadRequestException("You must have a social login for either Google or Kakao");
-
-        // 중복 google ID, kakao ID 검사
-        if ((googleId != null && memberRepository.existsByGoogleId(googleId)) || (kakaoId != null && memberRepository.existsByKakaoId(kakaoId)))
-            throw new BadRequestException("This social account is already registered");
+        checkSocialId(googleId, kakaoId);
 
         // entity로 변환
         MemberEntity memberEntity = MemberEntity.builder()
@@ -96,19 +85,14 @@ public class SignUpService {
         return true;
     }
 
+    private void checkSocialId(String googleId, String kakaoId) {
+        // google, kakao ID 둘 다 없으면 Error
+        if (googleId == null && kakaoId == null)
+            throw new BadRequestException("You must have a social login for either Google or Kakao");
 
-    public boolean nicknameCheck(String nickname) {
-
-        String regex = "^[가-힣a-zA-Z0-9]{1,10}$";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(nickname);
-
-        if (!matcher.matches())
-            throw new BadRequestException("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
-
-        if (memberRepository.existsByNickname(nickname))
-            throw new BadRequestException("Nickname is already existed.");
-
-        return true;
+        // 중복 google ID, kakao ID 검사
+        if ((googleId != null && memberRepository.existsByGoogleId(googleId)) || (kakaoId != null && memberRepository.existsByKakaoId(kakaoId)))
+            throw new BadRequestException("This social account is already registered");
     }
+
 }

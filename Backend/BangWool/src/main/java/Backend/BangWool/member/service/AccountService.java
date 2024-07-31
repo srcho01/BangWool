@@ -25,6 +25,22 @@ public class AccountService {
     private final RedisUtil redisUtil;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
+
+    public boolean nicknameCheck(String nickname) {
+
+        String regex = "^[가-힣a-zA-Z0-9]{1,10}$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(nickname);
+
+        if (!matcher.matches())
+            throw new BadRequestException("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
+
+        if (memberRepository.existsByNickname(nickname))
+            throw new BadRequestException("Nickname is already existed.");
+
+        return true;
+    }
+
     @Transactional(readOnly = true)
     public String findEmail(String name, LocalDate birth) {
 

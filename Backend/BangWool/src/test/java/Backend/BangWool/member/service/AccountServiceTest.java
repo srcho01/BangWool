@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -44,7 +45,31 @@ class AccountServiceTest {
     AccountService accountService;
 
 
-    @DisplayName("이메일 찾기 - 에러 : 없는 유저")
+    @DisplayName("닉네임 확인 - 실패 : 닉네임 조건 미충족")
+    @ParameterizedTest
+    @ValueSource(strings = {"!@#$", "닉네임이너무길어123456"})
+    void nicknameCheckFail(String nickname) {
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> accountService.nicknameCheck(nickname));
+        assertThat(e.getMessage()).isEqualTo("The nickname must be 1 to 10 characters, consisting only of English, numbers, and Korean.");
+    }
+
+    @DisplayName("닉네임 확인 - 실패 : 이미 존재하는 닉네임")
+    @Test
+    void nicknameCheckFail2() {
+        // given
+        String nickname = "test";
+
+        // mocking
+        when(memberRepository.existsByNickname(nickname)).thenReturn(true);
+
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> accountService.nicknameCheck(nickname));
+        assertThat(e.getMessage()).isEqualTo("Nickname is already existed.");
+    }
+
+
+    @DisplayName("이메일 찾기 - 실패 : 없는 유저")
     @Test
     void findEmailFail() {
         // given
@@ -79,7 +104,7 @@ class AccountServiceTest {
     }
 
 
-    @DisplayName("이메일 인증 코드 전송 - 에러 : 존재하지 않는 유저")
+    @DisplayName("이메일 인증 코드 전송 - 실패 : 존재하지 않는 유저")
     @Test
     void sendEmailForPasswordFail() {
         // given
@@ -138,7 +163,7 @@ class AccountServiceTest {
         );
     }
 
-    @DisplayName("새 비밀번호 변경 - 에러")
+    @DisplayName("새 비밀번호 변경 - 실패")
     @ParameterizedTest
     @MethodSource("invalidSetPassword")
     void setNewPasswordFail(boolean isMemberExist, boolean isVerify, String pw1, String pw2) {
@@ -200,7 +225,7 @@ class AccountServiceTest {
         );
     }
 
-    @DisplayName("비밀번호 변경 - 에러")
+    @DisplayName("비밀번호 변경 - 실패")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
     void changePasswordFail(boolean isMemberExist, boolean isVerify, String prevPW, String newPW1, String newPW2) {
@@ -261,7 +286,7 @@ class AccountServiceTest {
     }
 
 
-    @DisplayName("회원정보 조회 - 에러 : 없는 유저")
+    @DisplayName("회원정보 조회 - 실패 : 없는 유저")
     @Test
     void getMemberInfoFail() {
         // given
@@ -298,14 +323,6 @@ class AccountServiceTest {
 
         // then
         assertThat(result).isInstanceOf(MemberInfoResponse.class);
-    }
-
-
-    @DisplayName("회원정보 수정 - 에러")
-    void setMemberInfoFail() { // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
-
-
-
     }
 
 }
