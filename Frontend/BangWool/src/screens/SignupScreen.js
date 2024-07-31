@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { View, Text, TextInput, ImageBackground, TouchableOpacity } from 'react-native';
+import { serverUrl } from '@env';
+import styles from './styles/SignupStyle';
 
 const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -9,25 +10,90 @@ const SignupScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [isChecked, setIsChecked] = useState(false);
+  const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
+  const [isNicknameConfirmed, setIsNicknameConfirmed] = useState(false);
 
-  const handleLogin = () => {
-    console.log('Signup button pressed');
+  const handleSignup = async () => {
+    if (password !== password2) {
+      alert('Passwords do not match');
+      return;
+    }
+  
+    const payload = {
+      email,
+      password1: password,
+      password2,
+      name,
+      nickname,
+      birth: '2000-01-01', // Replace with actual birthdate if needed
+    };
+  
+    try {
+      console.log('Sending signup request with payload:', payload); // Log the payload being sent
+  
+      const response = await fetch(`${serverUrl}auth/signup/local`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.text(); // Read the response body as text
+        console.error(`Signup failed. Status: ${response.status}, Details: ${errorDetails}`);
+        throw new Error(`Signup failed. Status: ${response.status}, Details: ${errorDetails}`);
+      }
+  
+      const data = await response.json();
+      console.log('Signup successful:', response.data);
+      // Handle successful signup, e.g., navigate to another screen or show a success message
+    } catch (error) {
+      console.error('Error during signup:', error.message); // Log the detailed error message
+    }
   };
+  
 
   const toggleCheckbox = () => {
     setIsChecked(!isChecked);
   };
+  const checkNicknameAvailability = async () => {
+    try {
+      console.log('Requesting nickname availability for:', nickname); // Log nickname being checked
+      const response = await fetch(`${serverUrl}auth/signup/nickname-check?nickname=${nickname}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`Network response was not ok. Status: ${response.status}, Details: ${errorDetails}`);
+      }
+  
+      const data = await response.json();
+      console.log('Nickname availability response:', data); // Log response data
+      setIsNicknameAvailable(data.data);
+      setIsNicknameConfirmed(data.data);
+    } catch (error) {
+      console.error('Error checking nickname availability:', error.message);
+      setIsNicknameAvailable(false);
+      setIsNicknameConfirmed(false);
+    }
+  };
+  
 
   return (
     <ImageBackground source={require('../../assets/images/l_default.png')} style={styles.background}>
       <Text style={styles.com}>방울</Text>
       <Text style={styles.title}>회원가입</Text>
       <View style={styles.container}>
-      <View style={styles.inputContainer}>
+        <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>이름</Text>
           <TextInput
             style={styles.input}
-            placeholder="김방울"
+            placeholder="ex) 김방울"
             value={name}
             onChangeText={setName}
             autoCapitalize="none"
@@ -35,26 +101,37 @@ const SignupScreen = ({ navigation }) => {
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>닉네임</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="방울이"
-            value={nickname}
-            onChangeText={setNickname}
-            autoCapitalize="none"
-          />
+          <View style={styles.nicknameContainer}>
+            <TextInput
+              style={[styles.input, { opacity: isNicknameConfirmed ? 0.5 : 1 }]}
+              placeholder="ex) 방울이"
+              value={nickname}
+              onChangeText={setNickname}
+              autoCapitalize="none"
+              editable={!isNicknameConfirmed}
+            />
+            <TouchableOpacity
+              style={styles.checkButton}
+              onPress={checkNicknameAvailability}
+              disabled={isNicknameConfirmed}
+            >
+              <Text style={styles.checkButtonText}>중복확인</Text>
+            </TouchableOpacity>
+          </View>
+          {isNicknameAvailable === false && <Text style={styles.errorText}>닉네임이 이미 사용 중입니다.</Text>}
+          {isNicknameAvailable === true && <Text style={styles.successText}>닉네임을 사용할 수 있습니다.</Text>}
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>이메일</Text>
           <TextInput
             style={styles.input}
-            placeholder="user@example.com"
+            placeholder="ex) user@example.com"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
           />
         </View>
-        
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>비밀번호</Text>
           <TextInput
@@ -76,7 +153,11 @@ const SignupScreen = ({ navigation }) => {
           />
         </View>
         
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSignup}
+          disabled={!isNicknameConfirmed || !name || !email || !password || !password2}
+        >
           <Text style={styles.buttonText}>회원가입</Text>
         </TouchableOpacity>
         
@@ -92,94 +173,5 @@ const SignupScreen = ({ navigation }) => {
     </ImageBackground>
   );
 };
-
-const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  container: {
-    justifyContent: 'center', 
-    paddingHorizontal: 16,
-    paddingVertical:20,
-    marginHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: 'rgba(232, 232, 232, 0.8)',
-  },
-  com: {
-    position: 'absolute',
-    top: 16,
-    right: 16, 
-    fontSize: 24,
-    fontFamily: 'KCC-Hanbit',
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'left', 
-    marginLeft: 20, 
-  },
-  inputContainer: {
-    marginBottom: 12,
-  },
-  inputLabel: {
-    fontSize: 16,
-    marginBottom: 4,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgb(253, 253, 253)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  checkbox: {
-    width: 20,
-    height: 20,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: 'gray',
-    backgroundColor: 'rgb(91, 115, 133)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  checkboxLabel: {
-    fontSize: 14,
-  },
-  button: {
-    backgroundColor: 'rgb(91, 115, 133)',
-    padding: 10,
-    borderRadius: 8,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-  },
-  footer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  link: {
-    color: 'blue',
-  },
-});
 
 export default SignupScreen;
