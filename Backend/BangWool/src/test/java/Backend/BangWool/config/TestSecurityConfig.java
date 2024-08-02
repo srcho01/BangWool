@@ -19,7 +19,8 @@ public class TestSecurityConfig {
         // 경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                                .anyRequest().permitAll()
+                        .requestMatchers("/auth/**", "/login/oauth").permitAll()
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
