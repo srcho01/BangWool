@@ -100,7 +100,9 @@ jobs:
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        fields: repo,message,workflow
+        author_name: 'Seorim Cho'
+        job_name: 'Github Actions CI/CD'
+        fields: repo,commit,message,workflow
       env:
         SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK }}"
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
