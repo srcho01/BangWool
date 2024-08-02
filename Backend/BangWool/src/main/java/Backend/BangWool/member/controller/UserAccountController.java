@@ -1,5 +1,6 @@
 package Backend.BangWool.member.controller;
 
+import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.dto.*;
 import Backend.BangWool.member.service.UserAccountService;
 import Backend.BangWool.response.DataResponse;
@@ -44,7 +45,7 @@ public class UserAccountController {
         if (userAccountService.sendEmailForPassword(request)) {
             return StatusResponse.of(200);
         }
-        return StatusResponse.of(500);
+        throw new ServerException("Internal Server Error");
     }
 
     @Operation(summary = "비밀번호 찾기 이메일 인증코드 확인", description = "이메일과 입력받은 인증코드를 받아 전송한 코드와 일치하는지 확인")
@@ -62,7 +63,7 @@ public class UserAccountController {
         if (userAccountService.setNewPassword(request)) {
             return StatusResponse.of(200);
         }
-        return StatusResponse.of(500);
+        throw new ServerException("Internal Server Error");
     }
     
 }

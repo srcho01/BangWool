@@ -1,5 +1,6 @@
 package Backend.BangWool.member.controller;
 
+import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.service.SignUpService;
@@ -26,7 +27,7 @@ public class SignUpController {
     public StatusResponse localSignUp(@Valid @RequestBody LocalSignUpRequest signUpRequestDto) {
         if (signUpService.localSignUp(signUpRequestDto))
             return StatusResponse.of(200);
-        return StatusResponse.of(500);
+        throw new ServerException("Internal Server Error");
     }
 
     @Operation(summary = "소셜 회원가입", description = "※ googleId와 kakaoId 둘 다 없으면 안됩니다 ※")
@@ -34,7 +35,7 @@ public class SignUpController {
     public StatusResponse socialSignUp(@Valid @RequestBody OAuthSignUpRequest signUpRequestDto) {
         if (signUpService.socialSignUp(signUpRequestDto))
             return StatusResponse.of(200);
-        return StatusResponse.of(500);
+        throw new ServerException("Internal Server Error");
     }
 
 }
