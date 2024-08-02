@@ -16,10 +16,8 @@ import java.util.Collection;
 @Builder
 public class Session implements UserDetails {
 
-    // 유저의 이메일이 들어간다
-    // 유저의 이메일은 중복 불가능하다
     private int id;
-    private String username;
+    private String username; // 유저의 이메일
     private String role;
 
     @Override
