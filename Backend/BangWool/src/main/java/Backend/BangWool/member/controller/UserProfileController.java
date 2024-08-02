@@ -1,7 +1,11 @@
 package Backend.BangWool.member.controller;
 
+import Backend.BangWool.exception.ServerException;
+import Backend.BangWool.member.dto.ChangeMemberInfo;
+import Backend.BangWool.util.CurrentSession;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
+import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.service.UserProfileService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
@@ -22,17 +26,27 @@ public class UserProfileController {
 
     @Operation(summary = "비밀번호 변경")
     @PostMapping("password/change")
-    public StatusResponse changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        if (userProfileService.changePassword(request)) {
+    public StatusResponse changePassword(@CurrentSession Session session,
+                                         @Valid @RequestBody ChangePasswordRequest request) {
+
+        if (userProfileService.changePassword(session, request)) {
             return StatusResponse.of(200);
         }
-        return StatusResponse.of(500);
+        throw new ServerException("Internal Server Error");
     }
 
     @Operation(summary = "회원정보 조회")
     @GetMapping("info")
-    public DataResponse<MemberInfoResponse> getMemberInfo(@RequestParam String email) {
-        MemberInfoResponse response = userProfileService.getMemberInfo(email);
+    public DataResponse<MemberInfoResponse> getMemberInfo(@CurrentSession Session session) {
+        MemberInfoResponse response = userProfileService.getMemberInfo(session);
+        return DataResponse.of(response);
+    }
+
+    @Operation(summary = "회원정보 수정")
+    @PostMapping("info")
+    public DataResponse<MemberInfoResponse> setMemberInfo(@CurrentSession Session session,
+                                                          @Valid @RequestBody ChangeMemberInfo request) {
+        MemberInfoResponse response = userProfileService.setMemberInfo(session, request);
         return DataResponse.of(response);
     }
 

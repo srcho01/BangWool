@@ -6,9 +6,12 @@ import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.ChangeMemberInfo;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
+import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.RedisUtil;
+import Backend.BangWool.util.WithMockMember;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,6 +20,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
@@ -27,7 +31,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 public class UserProfileServiceTest {
@@ -44,6 +47,13 @@ public class UserProfileServiceTest {
     @Autowired
     private UserProfileService userProfileService;
 
+    private Session session;
+
+    @BeforeEach
+    void setup() {
+        this.session = (Session) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
     private static Stream<Arguments> invalidChangePassword() {
         return Stream.of(
@@ -59,12 +69,12 @@ public class UserProfileServiceTest {
     @DisplayName("비밀번호 변경 - 실패")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
+    @WithMockMember
     void changePasswordFail(boolean isMemberExist, boolean isVerify, String prevPW, String newPW1, String newPW2) {
         // given
+        String email = session.getUsername();
         String password = "test1234!!";
-        String email = "test@test.com";
         ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
                 .prevPassword(password)
                 .password1(newPW1)
                 .password2(newPW2)
@@ -78,22 +88,22 @@ public class UserProfileServiceTest {
 
         // when & then
         if (isMemberExist) {
-            assertThrows(BadRequestException.class, () -> userProfileService.changePassword(request));
+            assertThrows(BadRequestException.class, () -> userProfileService.changePassword(session, request));
         } else {
-            assertThrows(NotFoundException.class, () -> userProfileService.changePassword(request));
+            assertThrows(NotFoundException.class, () -> userProfileService.changePassword(session, request));
         }
     }
 
     @DisplayName("비밀번호 변경 - 성공")
     @Test
+    @WithMockMember
     void changePasswordSuccess() {
         // given
-        String email = "test@test.com";
+        String email = session.getUsername();
         String prevPW = "test1234!!";
         String newPW1 = "test123456!!";
         String newPW2 = "test123456!!";
         ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
                 .prevPassword(prevPW)
                 .password1(newPW1)
                 .password2(newPW2)
@@ -106,7 +116,7 @@ public class UserProfileServiceTest {
         when(redisUtil.getData(CONSTANT.REDIS_EMAIL_VERIFY + email)).thenReturn(Optional.of("true"));
 
         // when
-        boolean result = userProfileService.changePassword(request);
+        boolean result = userProfileService.changePassword(session, request);
 
         // then
         verify(memberRepository, times(1)).findByEmail(email);
@@ -119,23 +129,25 @@ public class UserProfileServiceTest {
 
     @DisplayName("회원정보 조회 - 실패 : 없는 유저")
     @Test
+    @WithMockMember
     void getMemberInfoFail() {
         // given
-        String email = "test@test.com";
+        String email = session.getUsername();
 
         // mocking
         when(memberRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // when & then
-        NotFoundException e = assertThrows(NotFoundException.class, () -> userProfileService.getMemberInfo(email));
+        NotFoundException e = assertThrows(NotFoundException.class, () -> userProfileService.getMemberInfo(session));
         assertThat(e.getMessage()).isEqualTo("User not found");
     }
 
     @DisplayName("회원정보 조회 - 성공")
     @Test
+    @WithMockMember
     void getMemberInfoSuccess() {
         // given
-        String email = "test@test.com";
+        String email = session.getUsername();
 
         // mocking
         MemberEntity member = MemberEntity.builder()
@@ -150,49 +162,58 @@ public class UserProfileServiceTest {
         when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
         // when
-        MemberInfoResponse result = userProfileService.getMemberInfo(email);
+        MemberInfoResponse result = userProfileService.getMemberInfo(session);
 
         // then
         assertThat(result).isInstanceOf(MemberInfoResponse.class);
     }
 
+
     @DisplayName("회원정보 수정 - 실패 : 소셜가입자 소셜 아이디 모두 삭제")
     @Test
+    @WithMockMember
     void setMemberInfoFail() {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
         ChangeMemberInfo request = ChangeMemberInfo.builder()
-                .email("test@test.com")
                 .nickname("test")
                 .googleId(null)
                 .kakaoId(null)
                 .build();
 
         // when & then
-        BadRequestException e = assertThrows(BadRequestException.class, () -> userProfileService.setMemberInfo(request));
+        BadRequestException e = assertThrows(BadRequestException.class, () -> userProfileService.setMemberInfo(session, request));
         assertThat(e.getMessage()).isEqualTo("Member signed up for social membership cannot disconnect all social connections.");
     }
 
-    // @DisplayName("회원정보 수정 - 성공")
-    // @Test
-    // void setMemberInfoSuccess() {
-    //     // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
-    //     // given
-    //     ChangeMemberInfo request = ChangeMemberInfo.builder()
-    //             .email("test@test.com")
-    //             .nickname("test")
-    //             .googleId("afoawnf029nf")
-    //             .kakaoId("4082630523")
-    //             .build();
-    //
-    //     // mocking
-    //     // when(memberRepository.findByEmail(request.getEmail())).thenReturn();
-    //
-    //     // when
-    //     accountService.setMemberInfo(request);
-    //
-    //     // then
-    //     verify(memberRepository, times(1)).save(any(MemberEntity.class));
-    // }
+    @DisplayName("회원정보 수정 - 성공")
+    @Test
+    @WithMockMember
+    void setMemberInfoSuccess() {
+        // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
+        // given
+        String email = session.getUsername();
+        ChangeMemberInfo request = ChangeMemberInfo.builder()
+                .nickname("test")
+                .googleId("wnefpivnjwofi")
+                .build();
+
+        // mocking
+        MemberEntity member = MemberEntity.builder()
+                .email(email)
+                .password("1234")
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("wnefpivnjwofi")
+                .build();
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+
+        // when
+        MemberInfoResponse result = userProfileService.setMemberInfo(session, request);
+
+        // then
+        assertThat(result).isInstanceOf(MemberInfoResponse.class);
+    }
 
 }

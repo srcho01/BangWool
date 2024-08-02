@@ -1,12 +1,16 @@
 package Backend.BangWool.member.controller;
 
 import Backend.BangWool.config.TestSecurityConfig;
+import Backend.BangWool.member.dto.ChangeMemberInfo;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
+import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.service.UserProfileService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
+import Backend.BangWool.util.WithMockMember;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -40,24 +45,29 @@ public class UserProfileControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private Session session;
+
+    @BeforeEach
+    void setup() {
+        this.session = (Session) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
 
     private static Stream<Arguments> invalidChangePassword() {
         return Stream.of(
-                Arguments.of(null, "prev1234!!", "test1234!!", "test1234!!", "Email is required"),
-                Arguments.of("test", "prev1234!!", "test1234!!", "test1234!!", "Email is out form"),
-                Arguments.of("test@test.com", null, "test1234!!", "test1234!!", "previous password is Required"),
-                Arguments.of("test@test.com", "prev1234!!", null, "test1234!!", "password is Required"),
-                Arguments.of("test@test.com", "prev1234!!", "test1234!!", null, "password confirmation is Required")
+                Arguments.of( null, "test1234!!", "test1234!!", "previous password is Required"),
+                Arguments.of("prev1234!!", null, "test1234!!", "password is Required"),
+                Arguments.of("prev1234!!", "test1234!!", null, "password confirmation is Required")
         );
     }
 
     @DisplayName("비밀번호 변경 - 에러")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
-    void changePasswordFail(String email, String prev, String pw1, String pw2, String message) throws Exception {
+    @WithMockMember
+    void changePasswordFail(String prev, String pw1, String pw2, String message) throws Exception {
         // given
         ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
                 .prevPassword(prev)
                 .password1(pw1)
                 .password2(pw2)
@@ -75,15 +85,14 @@ public class UserProfileControllerTest {
 
     @DisplayName("비밀번호 변경 - 성공")
     @Test
+    @WithMockMember
     void changePasswordSuccess() throws Exception {
         // given
-        String email = "test@test.com";
         String prev = "prev1234!!";
         String pw1 = "test1234!!";
         String pw2 = "test1234!!";
 
         ChangePasswordRequest request = ChangePasswordRequest.builder()
-                .email(email)
                 .prevPassword(prev)
                 .password1(pw1)
                 .password2(pw2)
@@ -91,7 +100,7 @@ public class UserProfileControllerTest {
         String requestJson = objectMapper.writeValueAsString(request);
 
         // mocking
-        when(userProfileService.changePassword(request)).thenReturn(true);
+        when(userProfileService.changePassword(session, request)).thenReturn(true);
 
         // then
         String response = objectMapper.writeValueAsString(StatusResponse.of(200));
@@ -103,22 +112,12 @@ public class UserProfileControllerTest {
     }
 
 
-    @DisplayName("회원정보 조회 - 에러")
-    @Test
-    void getMemberInfoFail() throws Exception {
-        // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(400, "Required parameter not found."));
-
-        mvc.perform(get("/user/info"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().json(responseJson));
-    }
-
     @DisplayName("회원정보 조회 - 성공")
     @Test
+    @WithMockMember
     void getMemberInfoSuccess() throws Exception {
         // given
-        String email = "test@test.com";
+        String email = session.getUsername();
 
         // when
         MemberInfoResponse response = MemberInfoResponse.builder()
@@ -127,12 +126,45 @@ public class UserProfileControllerTest {
                 .nickname("test")
                 .birth(LocalDate.of(2000, 1, 1))
                 .build();
-        when(userProfileService.getMemberInfo(email)).thenReturn(response);
+        when(userProfileService.getMemberInfo(session)).thenReturn(response);
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
-        mvc.perform(get("/user/info")
-                        .param("email", email))
+        mvc.perform(get("/user/info"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+
+    @DisplayName("회원정보 수정 - 성공")
+    @Test
+    @WithMockMember
+    void setMemberInfoFail() throws Exception {
+        // given
+        String email = session.getUsername();
+        ChangeMemberInfo request = ChangeMemberInfo.builder()
+                .nickname("newname")
+                .googleId("google")
+                .kakaoId("prev")
+                .build();
+        String requestJson = objectMapper.writeValueAsString(request);
+
+        // when
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                .email(email)
+                .name("test")
+                .nickname("newname")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("google")
+                .kakaoId("prev")
+                .build();
+        when(userProfileService.setMemberInfo(session, request)).thenReturn(response);
+
+        // then
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
+        mvc.perform(post("/user/info")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
