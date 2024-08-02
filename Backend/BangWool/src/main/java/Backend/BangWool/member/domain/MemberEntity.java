@@ -22,13 +22,17 @@ public class MemberEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @Setter
     @Column(unique = true, nullable = false)
     private String nickname;
 
     @Column(nullable = false)
     private LocalDate birth;
 
+    @Setter
     private String googleId;
+    @Setter
     private String kakaoId;
 
     @Builder
