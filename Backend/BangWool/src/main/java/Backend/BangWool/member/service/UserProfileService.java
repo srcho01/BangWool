@@ -63,12 +63,12 @@ public class UserProfileService {
 
         String email = session.getUsername();
 
-        if (request.getGoogleId() == null && request.getKakaoId() == null) {
-            throw new BadRequestException("Member signed up for social membership cannot disconnect all social connections.");
-        }
-
         MemberEntity member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found"));
+
+        if (member.getPassword() == null && request.getGoogleId() == null && request.getKakaoId() == null) {
+            throw new BadRequestException("Member signed up for social membership cannot disconnect all social connections.");
+        }
 
         member.setNickname(request.getNickname());
         member.setGoogleId(request.getGoogleId());

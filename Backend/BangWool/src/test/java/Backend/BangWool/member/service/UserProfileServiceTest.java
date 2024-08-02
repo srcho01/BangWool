@@ -175,11 +175,21 @@ public class UserProfileServiceTest {
     void setMemberInfoFail() {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
+        String email = session.getUsername();
         ChangeMemberInfo request = ChangeMemberInfo.builder()
                 .nickname("test")
                 .googleId(null)
-                .kakaoId(null)
                 .build();
+
+        // mocking
+        MemberEntity member = MemberEntity.builder()
+                .email(email)
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("wnefpivnjwofi")
+                .build();
+        when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
 
         // when & then
         BadRequestException e = assertThrows(BadRequestException.class, () -> userProfileService.setMemberInfo(session, request));
