@@ -15,10 +15,12 @@ import java.util.Date;
 public class JWTUtil {
 
     private final SecretKey secretKey;
+    private final RedisUtil redisUtil;
 
     // secret key 가져오기
-    public JWTUtil(@Value("${spring.jwt.secret}")String secret) {
+    public JWTUtil(@Value("${spring.jwt.secret}")String secret, RedisUtil redisUtil) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.redisUtil = redisUtil;
     }
 
     // 토큰 발급
@@ -33,6 +35,20 @@ public class JWTUtil {
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)
                 .compact();
+    }
+
+    // 토큰 파기
+    public void expireToken(String type, String token) {
+        long issuedAt = getIssuedAt(token);
+
+        Date now = new Date();
+        if (type.equals("access")) {
+            long expire = (CONSTANT.ACCESS_EXPIRED - (now.getTime() - issuedAt)/1000) + 10*60; // 남은 시간 + 10분
+            redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + token, "invalid", expire);
+        } else if (type.equals("refresh")) {
+            long expire = (CONSTANT.REFRESH_EXPIRED - (now.getTime() - issuedAt)/1000) + 10*60; // 남은 시간 + 10분
+            redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + token, "invalid", expire);
+        }
     }
 
     // id 가져오기

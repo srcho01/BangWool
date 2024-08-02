@@ -17,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Map;
 
 public class CustomLogoutFilter extends GenericFilterBean {
@@ -51,6 +50,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
+        // get tokens
         Map<String, String> requestBody;
         try {
             requestBody = new ObjectMapper().readValue(request.getInputStream(), new TypeReference<Map<String, String>>(){});
@@ -79,9 +79,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
                 }
 
                 // Access Token 블랙리스트 등록
-                Date now = new Date();
-                long expire = (CONSTANT.ACCESS_EXPIRED - (now.getTime() - issuedAt)/1000) + 10*60; // 남은 시간 + 10분 (단위 : second)
-                redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + access, "invalid", expire);
+                jwtUtil.expireToken("access", access);
+
             }
         } catch (MalformedJwtException | SignatureException | UnsupportedJwtException | IllegalArgumentException e) {
             setBody(response, 400,"Token form is incorrect");
@@ -117,11 +116,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        // Refresh Token 파기
-        Date now = new Date();
-        long expire = (CONSTANT.REFRESH_EXPIRED - (now.getTime() - issuedAt)/1000) + 10*60; // 남은 시간 + 10분 (단위 : second)
-        redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + refresh, "invalid", expire);
-
+        // Access Token 블랙리스트 등록
+        jwtUtil.expireToken("refresh", refresh);
 
         setBody(response, 200, "OK");
     }
