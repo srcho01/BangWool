@@ -96,42 +96,12 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       run: aws deploy create-deployment --application-name bangwool --deployment-group-name bangwool-group --file-exists-behavior OVERWRITE --s3-location bucket=bangwool-deploy,bundleType=zip,key=bangwool.zip --region ap-northeast-2
 
-    - name: Notify Slack on Success
-      if: success()
-      id: slack-success
+    - name: Notify Slack
       uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}
-        custom_payload: |
-          {
-            text: "Github Action",
-            attachments: {
-                "color": "#36a64f",
-                "title": "Github Action CI/CD",
-                "title_link": "https://github.com/srcho01/BangWool",
-                "text": "GitHub Action Success"
-            }
-          }
+        fields: repo,message,workflow
       env:
         SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK }}"
         SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-    
-    - name: Notify Slack on Failure
-      if: failure()
-      id: slack-failure
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        custom_payload: |
-          {
-            text: "Github Action",
-            attachments: {
-                "color": "#ff0000",
-                "title": "Github Action CI/CD",
-                "title_link": "https://github.com/srcho01/BangWool",
-                "text": "GitHub Action Failure"
-            }
-          }
-      env:
-        SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK }}"
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+      if: always()
