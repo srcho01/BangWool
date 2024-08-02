@@ -42,7 +42,7 @@ public class UserProfileController {
         return DataResponse.of(response);
     }
 
-    @Operation(summary = "회원정보 수정")
+    @Operation(summary = "회원정보 수정", description = "변경하지 않을 정보는 그대로 다시 넣어 보냅니다. 삭제하려면 null로 설정합니다.")
     @PostMapping("info")
     public DataResponse<MemberInfoResponse> setMemberInfo(@CurrentSession Session session,
                                                           @Valid @RequestBody ChangeMemberInfo request) {
