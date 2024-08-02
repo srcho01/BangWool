@@ -87,4 +87,12 @@ public class UserProfileService {
                 .build();
     }
 
+    public void withdrawal(Session session) {
+        if (!memberRepository.existsById(session.getId())) {
+            throw new NotFoundException("Member with id " + session.getId() + " not found");
+        }
+
+        memberRepository.deleteById(session.getId());
+    }
+
 }

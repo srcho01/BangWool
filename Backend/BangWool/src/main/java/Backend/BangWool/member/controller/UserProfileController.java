@@ -50,4 +50,11 @@ public class UserProfileController {
         return DataResponse.of(response);
     }
 
+    @Operation(summary = "회원 탈퇴")
+    @DeleteMapping("withdrawal")
+    public StatusResponse withdrawal(@CurrentSession Session session) {
+        userProfileService.withdrawal(session);
+        return StatusResponse.of(200);
+    }
+
 }

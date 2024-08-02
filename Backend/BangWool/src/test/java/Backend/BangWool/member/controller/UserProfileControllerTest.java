@@ -27,14 +27,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.stream.Stream;
 
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {UserProfileController.class})
 @ContextConfiguration(classes = TestSecurityConfig.class)
+@WithMockMember
 public class UserProfileControllerTest {
 
     @MockBean
@@ -64,7 +65,6 @@ public class UserProfileControllerTest {
     @DisplayName("비밀번호 변경 - 에러")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
-    @WithMockMember
     void changePasswordFail(String prev, String pw1, String pw2, String message) throws Exception {
         // given
         ChangePasswordRequest request = ChangePasswordRequest.builder()
@@ -85,7 +85,6 @@ public class UserProfileControllerTest {
 
     @DisplayName("비밀번호 변경 - 성공")
     @Test
-    @WithMockMember
     void changePasswordSuccess() throws Exception {
         // given
         String prev = "prev1234!!";
@@ -114,7 +113,6 @@ public class UserProfileControllerTest {
 
     @DisplayName("회원정보 조회 - 성공")
     @Test
-    @WithMockMember
     void getMemberInfoSuccess() throws Exception {
         // given
         String email = session.getUsername();
@@ -138,7 +136,6 @@ public class UserProfileControllerTest {
 
     @DisplayName("회원정보 수정 - 성공")
     @Test
-    @WithMockMember
     void setMemberInfoFail() throws Exception {
         // given
         String email = session.getUsername();
@@ -165,6 +162,23 @@ public class UserProfileControllerTest {
         mvc.perform(post("/user/info")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+
+    @DisplayName("회원 탈퇴 - 성공")
+    @Test
+    void withdrawalSuccess() throws Exception {
+        // given
+        int memberId = session.getId();
+
+        // when
+        doNothing().when(userProfileService).withdrawal(session);
+
+        // then
+        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
+        mvc.perform(delete("/user/withdrawal"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }

@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
+@WithMockMember
 public class UserProfileServiceTest {
 
     @MockBean
@@ -69,7 +70,6 @@ public class UserProfileServiceTest {
     @DisplayName("비밀번호 변경 - 실패")
     @ParameterizedTest
     @MethodSource("invalidChangePassword")
-    @WithMockMember
     void changePasswordFail(boolean isMemberExist, boolean isVerify, String prevPW, String newPW1, String newPW2) {
         // given
         String email = session.getUsername();
@@ -96,7 +96,6 @@ public class UserProfileServiceTest {
 
     @DisplayName("비밀번호 변경 - 성공")
     @Test
-    @WithMockMember
     void changePasswordSuccess() {
         // given
         String email = session.getUsername();
@@ -129,7 +128,6 @@ public class UserProfileServiceTest {
 
     @DisplayName("회원정보 조회 - 실패 : 없는 유저")
     @Test
-    @WithMockMember
     void getMemberInfoFail() {
         // given
         String email = session.getUsername();
@@ -144,7 +142,6 @@ public class UserProfileServiceTest {
 
     @DisplayName("회원정보 조회 - 성공")
     @Test
-    @WithMockMember
     void getMemberInfoSuccess() {
         // given
         String email = session.getUsername();
@@ -171,7 +168,6 @@ public class UserProfileServiceTest {
 
     @DisplayName("회원정보 수정 - 실패 : 소셜가입자 소셜 아이디 모두 삭제")
     @Test
-    @WithMockMember
     void setMemberInfoFail() {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
@@ -198,7 +194,6 @@ public class UserProfileServiceTest {
 
     @DisplayName("회원정보 수정 - 성공")
     @Test
-    @WithMockMember
     void setMemberInfoSuccess() {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
@@ -224,6 +219,34 @@ public class UserProfileServiceTest {
 
         // then
         assertThat(result).isInstanceOf(MemberInfoResponse.class);
+    }
+
+
+    @DisplayName("회원 탈퇴 - 실패")
+    @Test
+    void withdrawalFail() {
+        // given
+        int memberId = session.getId();
+
+        // when & then
+        NotFoundException e = assertThrows(NotFoundException.class, () -> userProfileService.withdrawal(session));
+        assertThat(e.getMessage()).isEqualTo("Member with id " + memberId + " not found");
+    }
+
+    @DisplayName("회원 탈퇴 - 성공")
+    @Test
+    void withdrawalSuccess() {
+        // given
+        int memberId = session.getId();
+
+        // mocking
+        when(memberRepository.existsById(session.getId())).thenReturn(true);
+
+        // when
+        userProfileService.withdrawal(session);
+
+        // then
+        verify(memberRepository, times(1)).deleteById(memberId);
     }
 
 }
