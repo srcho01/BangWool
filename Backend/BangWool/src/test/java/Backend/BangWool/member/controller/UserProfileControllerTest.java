@@ -170,10 +170,7 @@ public class UserProfileControllerTest {
     @DisplayName("회원 탈퇴 - 성공")
     @Test
     void withdrawalSuccess() throws Exception {
-        // given
-        int memberId = session.getId();
-
-        // when
+        // given & when
         doNothing().when(userProfileService).withdrawal(session);
 
         // then

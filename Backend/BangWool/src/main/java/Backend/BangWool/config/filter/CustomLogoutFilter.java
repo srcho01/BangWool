@@ -70,7 +70,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
         try {
             if (!jwtUtil.isExpired(access)) { // access 토큰 시간이 남았다면 blacklist 등록
                 String category = jwtUtil.getCategory(access);
-                long issuedAt = jwtUtil.getIssuedAt(access);
 
                 // access 토큰인지 확인
                 if (!category.equals("access")) {
@@ -102,7 +101,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         // 토큰에서 정보 획득
         String category = jwtUtil.getCategory(refresh);
-        long issuedAt = jwtUtil.getIssuedAt(refresh);
 
         // refresh 토큰인지 확인
         if (!category.equals("refresh")) {
