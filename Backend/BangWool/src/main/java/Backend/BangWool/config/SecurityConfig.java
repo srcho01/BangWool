@@ -21,8 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
@@ -52,6 +50,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable); // form 로그인 방식
         http.httpBasic(AbstractHttpConfigurer::disable); // http basic 인증 방식
+        http.cors(AbstractHttpConfigurer::disable); // cors 설정
 
 
         // 경로별 인가 작업
@@ -88,18 +87,6 @@ public class SecurityConfig {
         filter.setFilterProcessesUrl("/login/oauth");
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS");
-            }
-        };
     }
 
 }
