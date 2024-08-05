@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, ImageBackground, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, ImageBackground, TouchableOpacity, Alert } from 'react-native';
 import { serverUrl } from '@env';
 import styles from './styles/SignupStyle';
 
@@ -9,28 +9,59 @@ const SignupScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
-  const [isChecked, setIsChecked] = useState(false);
+  const [birthdate, setBirthdate] = useState(''); // State for birthdate
   const [isNicknameAvailable, setIsNicknameAvailable] = useState(null);
   const [isNicknameConfirmed, setIsNicknameConfirmed] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [isCodeSent, setIsCodeSent] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
+  const parseBirthdate = (input) => {
+    if (input.length !== 8 || isNaN(input)) {
+      return null; // Invalid input length or not a number
+    }
+
+    const year = input.substring(0, 4);
+    const month = input.substring(4, 6);
+    const day = input.substring(6, 8);
+
+    // Validate month and day
+    if (month < 1 || month > 12 || day < 1 || day > 31) {
+      return null;
+    }
+
+    const date = new Date(`${year}-${month}-${day}`);
+    if (date.getFullYear() !== parseInt(year) || date.getMonth() + 1 !== parseInt(month) || date.getDate() !== parseInt(day)) {
+      return null; // Invalid date
+    }
+
+    return `${year}-${month}-${day}`; // Return in YYYY-MM-DD format
+  };
 
   const handleSignup = async () => {
     if (password !== password2) {
-      alert('Passwords do not match');
+      Alert.alert('Passwords do not match');
       return;
     }
-  
+
+    const formattedBirthdate = parseBirthdate(birthdate);
+    if (!formattedBirthdate) {
+      Alert.alert('Validation Error', 'Please enter a valid birthdate in YYYYMMDD format');
+      return;
+    }
+
     const payload = {
       email,
       password1: password,
       password2,
       name,
       nickname,
-      birth: '2000-01-01', // Replace with actual birthdate if needed
+      birth: formattedBirthdate, // Include formatted birthdate in the payload
     };
-  
+
     try {
-      console.log('Sending signup request with payload:', payload); // Log the payload being sent
-  
+      console.log('Sending signup request with payload:', payload);
+
       const response = await fetch(`${serverUrl}auth/signup/local`, {
         method: 'POST',
         headers: {
@@ -38,42 +69,40 @@ const SignupScreen = ({ navigation }) => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
-        const errorDetails = await response.text(); // Read the response body as text
+        const errorDetails = await response.text();
         console.error(`Signup failed. Status: ${response.status}, Details: ${errorDetails}`);
         throw new Error(`Signup failed. Status: ${response.status}, Details: ${errorDetails}`);
       }
-  
+
       const data = await response.json();
-      console.log('Signup successful:', response.data);
-      // Handle successful signup, e.g., navigate to another screen or show a success message
+      console.log('Signup successful:', data);
+
+      Alert.alert(
+        'Signup Successful',
+        'Please check your email to verify your account before logging in.',
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
+      );
     } catch (error) {
-      console.error('Error during signup:', error.message); // Log the detailed error message
+      console.error('Error during signup:', error.message);
     }
   };
-  
 
-  const toggleCheckbox = () => {
-    setIsChecked(!isChecked);
-  };
   const checkNicknameAvailability = async () => {
     try {
-      console.log('Requesting nickname availability for:', nickname); // Log nickname being checked
-      const response = await fetch(`${serverUrl}auth/signup/nickname-check?nickname=${nickname}`, {
+      console.log('Requesting nickname availability for:', nickname);
+      const response = await fetch(`${serverUrl}auth/nickname-check?nickname=${nickname}`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
-  
+
       if (!response.ok) {
         const errorDetails = await response.text();
         throw new Error(`Network response was not ok. Status: ${response.status}, Details: ${errorDetails}`);
       }
-  
+
       const data = await response.json();
-      console.log('Nickname availability response:', data); // Log response data
+      console.log('Nickname availability response:', data);
       setIsNicknameAvailable(data.data);
       setIsNicknameConfirmed(data.data);
     } catch (error) {
@@ -82,7 +111,60 @@ const SignupScreen = ({ navigation }) => {
       setIsNicknameConfirmed(false);
     }
   };
-  
+
+  const sendVerificationCode = async () => {
+    try {
+      const payload = { email };
+      console.log('Sending verification code to:', email);
+
+      const response = await fetch(`${serverUrl}auth/email/send`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`Failed to send verification code. Status: ${response.status}, Details: ${errorDetails}`);
+      }
+
+      const data = await response.json();
+      console.log('Verification code sent:', data);
+      setIsCodeSent(true);
+      Alert.alert('Verification Code Sent', 'Please check your email for the verification code.');
+    } catch (error) {
+      console.error('Error sending verification code:', error.message);
+    }
+  };
+
+  const verifyEmailCode = async () => {
+    try {
+      const payload = { email, code: verificationCode };
+      console.log('Verifying email with payload:', payload);
+
+      const response = await fetch(`${serverUrl}auth/email/check`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorDetails = await response.text();
+        throw new Error(`Failed to verify email. Status: ${response.status}, Details: ${errorDetails}`);
+      }
+
+      const data = await response.json();
+      console.log('Email verified:', data);
+      setIsEmailVerified(true);
+      Alert.alert('Email Verified', 'Your email has been successfully verified.');
+    } catch (error) {
+      console.error('Error verifying email:', error.message);
+    }
+  };
 
   return (
     <ImageBackground source={require('../../assets/images/l_default.png')} style={styles.background}>
@@ -123,13 +205,53 @@ const SignupScreen = ({ navigation }) => {
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>이메일</Text>
+          <View style={styles.emailContainer}>
+            <TextInput
+              style={[styles.input, { opacity: isCodeSent ? 0.5 : 1 }]}
+              placeholder="ex) user@example.com"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isCodeSent}
+            />
+            <TouchableOpacity
+              style={styles.sendButton}
+              onPress={sendVerificationCode}
+              disabled={isCodeSent}
+            >
+              <Text style={styles.checkButtonText}>인증번호 보내기</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {isCodeSent && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>인증번호</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="인증번호 입력"
+              value={verificationCode}
+              onChangeText={setVerificationCode}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.verifyButton}
+              onPress={verifyEmailCode}
+              disabled={isEmailVerified}
+            >
+              <Text style={styles.verifyButtonText}>인증</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        <View style={styles.inputContainer}>
+          <Text style={styles.inputLabel}>생년월일 (YYYYMMDD)</Text>
           <TextInput
             style={styles.input}
-            placeholder="ex) user@example.com"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            placeholder="ex) 20240101"
+            value={birthdate}
+            onChangeText={setBirthdate}
+            keyboardType="numeric"
+            maxLength={8}
           />
         </View>
         <View style={styles.inputContainer}>
@@ -152,15 +274,13 @@ const SignupScreen = ({ navigation }) => {
             secureTextEntry
           />
         </View>
-        
         <TouchableOpacity
           style={styles.button}
           onPress={handleSignup}
-          disabled={!isNicknameConfirmed || !name || !email || !password || !password2}
+          disabled={!isNicknameConfirmed || !name || !isEmailVerified || !email || !password || !password2 || !birthdate}
         >
           <Text style={styles.buttonText}>회원가입</Text>
         </TouchableOpacity>
-        
         <View style={styles.footer}>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={styles.link}>아이디가 있어요! 로그인하기</Text>
