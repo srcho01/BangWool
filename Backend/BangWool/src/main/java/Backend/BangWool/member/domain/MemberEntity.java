@@ -1,8 +1,10 @@
 package Backend.BangWool.member.domain;
 
+import Backend.BangWool.util.CONSTANT;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 
 @Entity
@@ -35,6 +37,10 @@ public class MemberEntity {
     @Setter
     private String kakaoId;
 
+    @Setter
+    private URI profileImage;
+
+
     @Builder
     public MemberEntity(String email, String password, String name, String nickname, LocalDate birth, String googleId, String kakaoId) {
         this.email = email;
@@ -44,6 +50,7 @@ public class MemberEntity {
         this.birth = birth;
         this.googleId = googleId;
         this.kakaoId = kakaoId;
+        this.profileImage = CONSTANT.DEFAULT_PROFILE;
     }
 
 }
