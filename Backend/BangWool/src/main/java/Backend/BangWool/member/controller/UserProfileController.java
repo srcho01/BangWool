@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,7 +60,7 @@ public class UserProfileController {
     }
 
     @Operation(summary = "프로필 사진 추가", description = "Response : 설정한 프로필 사진 URL")
-    @PostMapping("profile/upload")
+    @PostMapping(value = "profile/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponse<String> profileUpload(@CurrentSession Session session,
                                         @RequestPart(value = "profile") MultipartFile image) {
         String uri = userProfileService.profileUpload(session, image);
