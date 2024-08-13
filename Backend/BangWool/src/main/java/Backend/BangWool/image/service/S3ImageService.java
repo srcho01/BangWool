@@ -42,7 +42,7 @@ public class S3ImageService {
             throw new BadRequestException("Image is empty");
         }
 
-        this.validateImageFileExtention(image.getOriginalFilename());
+        this.validateImageFileExtension(image.getOriginalFilename());
         try {
             return URI.create(this.uploadImageToS3(image, filename, targetSize, okToOverride));
         } catch (IOException e) {
@@ -60,7 +60,7 @@ public class S3ImageService {
     }
 
 
-    private void validateImageFileExtention(String filename) {
+    private void validateImageFileExtension(String filename) {
         int lastDotIndex = filename.lastIndexOf('.');
         if (lastDotIndex == -1) {
             throw new BadRequestException("Invalid image file format");
