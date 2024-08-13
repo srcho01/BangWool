@@ -62,6 +62,7 @@ public class UserProfileService {
                 .birth(member.getBirth())
                 .googleId(member.getGoogleId())
                 .kakaoId((member.getKakaoId()))
+                .profileUrl(member.getProfileImage())
                 .build();
     }
 
@@ -90,6 +91,7 @@ public class UserProfileService {
                 .birth(member.getBirth())
                 .googleId(member.getGoogleId())
                 .kakaoId((member.getKakaoId()))
+                .profileUrl(member.getProfileImage())
                 .build();
     }
 

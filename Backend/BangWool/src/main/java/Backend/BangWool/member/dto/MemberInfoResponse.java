@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
 import java.time.LocalDate;
 
 @Schema(description = "Member Information Response DTO")
@@ -37,5 +38,8 @@ public class MemberInfoResponse {
 
     @Schema(example = "4951351")
     private String kakaoId;
+
+    @Schema(example = "https://bangwool-images.s3.ap-northeast-2.amazonaws.com/default-profile.jpg")
+    private URI profileUrl;
 
 }
