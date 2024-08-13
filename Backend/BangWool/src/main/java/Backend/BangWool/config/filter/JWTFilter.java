@@ -19,7 +19,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -99,8 +99,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     private boolean shouldSkip(HttpServletRequest request) {
-        List<String> skipURI = new ArrayList<>();
-        skipURI.add("/login"); skipURI.add("/login/oauth"); skipURI.add("/swagger-ui/.*"); skipURI.add("/api-docs/.*"); skipURI.add("/auth/.*");
+        List<String> skipURI = Arrays.asList("/login", "/login/oauth", "/swagger-ui/.*", "/api-docs/.*", "/auth/.*", "/admin/.*");
 
         return skipURI.stream().anyMatch(uri -> {
             Pattern pattern = Pattern.compile(uri);

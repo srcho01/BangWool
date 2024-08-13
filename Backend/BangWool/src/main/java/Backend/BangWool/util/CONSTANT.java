@@ -1,5 +1,7 @@
 package Backend.BangWool.util;
 
+import java.net.URI;
+
 public class CONSTANT {
 
     private CONSTANT() {}
@@ -14,5 +16,9 @@ public class CONSTANT {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final long ACCESS_EXPIRED = 60 * 60L; // (초 단위) 1시간
     public static final long REFRESH_EXPIRED = 14 * 24 * 60 * 60L; // (초 단위) 14일
+
+    // default image path
+    private static final String imagePrefix = "https://bangwool-images.s3.ap-northeast-2.amazonaws.com/";
+    public static final URI DEFAULT_PROFILE = URI.create(imagePrefix + "default-profile.jpg");
 
 }

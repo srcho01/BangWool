@@ -2,18 +2,19 @@ package Backend.BangWool.member.controller;
 
 import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.dto.ChangeMemberInfo;
-import Backend.BangWool.util.CurrentSession;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.service.UserProfileService;
 import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
+import Backend.BangWool.util.CurrentSession;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "User Profile", description = "회원 정보 수정 관련 API")
 @RestController
@@ -55,6 +56,21 @@ public class UserProfileController {
     public StatusResponse withdrawal(@CurrentSession Session session) {
         userProfileService.withdrawal(session);
         return StatusResponse.of(200);
+    }
+
+    @Operation(summary = "프로필 사진 추가", description = "Response : 설정한 프로필 사진 URL")
+    @PostMapping("profile/upload")
+    public DataResponse<String> profileUpload(@CurrentSession Session session,
+                                        @RequestPart(value = "profile") MultipartFile image) {
+        String uri = userProfileService.profileUpload(session, image);
+        return DataResponse.of(uri);
+    }
+
+    @Operation(summary = "프로필 사진 삭제", description = "Response : default profile image URL")
+    @PostMapping("profile/delete")
+    public DataResponse<String> profileDelete(@CurrentSession Session session) {
+        String uri = userProfileService.profileDelete(session);
+        return DataResponse.of(uri);
     }
 
 }
