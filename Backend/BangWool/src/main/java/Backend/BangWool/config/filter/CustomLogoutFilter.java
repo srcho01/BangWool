@@ -45,8 +45,8 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         // method check
         String method = request.getMethod();
-        if (!method.equals("POST")) {
-            setBody(response, 400, "logout should be POST method");
+        if (!method.equals("DELETE")) {
+            setBody(response, 400, "logout should be DELETE method");
             return;
         }
 

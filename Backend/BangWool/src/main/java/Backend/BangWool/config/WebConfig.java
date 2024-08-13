@@ -13,11 +13,19 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("*"); // 모든 도메인 허용
-        configuration.addAllowedMethod("GET"); // 허용할 HTTP 메소드
+
+        // 모든 도메인 허용
+        configuration.addAllowedOrigin("*");
+
+        // 허용할 HTTP 메소드
+        configuration.addAllowedMethod("GET");
         configuration.addAllowedMethod("POST");
+        configuration.addAllowedMethod("PUT");
         configuration.addAllowedMethod("DELETE");
-        configuration.setAllowCredentials(true); // 자격 증명 허용
+        configuration.addAllowedMethod("PATCH");
+
+        // 자격 증명 허용
+        configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

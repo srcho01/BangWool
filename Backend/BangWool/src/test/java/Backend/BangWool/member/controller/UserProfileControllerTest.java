@@ -159,7 +159,7 @@ public class UserProfileControllerTest {
 
         // then
         String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
-        mvc.perform(post("/user/info")
+        mvc.perform(patch("/user/info")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
                 .andExpect(status().isOk())

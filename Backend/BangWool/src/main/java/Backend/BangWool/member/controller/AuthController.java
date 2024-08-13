@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -117,7 +118,7 @@ public class AuthController {
                     schema = @Schema(implementation = StatusResponse.class)
             )
     )
-    @PostMapping("/logout")
+    @DeleteMapping("/logout")
     public void logout(@RequestBody LogoutDTO logoutDTO) {}
 
 }

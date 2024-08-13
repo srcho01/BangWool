@@ -45,7 +45,7 @@ public class UserProfileController {
     }
 
     @Operation(summary = "회원정보 수정", description = "변경하지 않을 정보는 그대로 다시 넣어 보냅니다. 삭제하려면 null로 설정합니다.")
-    @PostMapping("info")
+    @PatchMapping("info")
     public DataResponse<MemberInfoResponse> setMemberInfo(@CurrentSession Session session,
                                                           @Valid @RequestBody ChangeMemberInfo request) {
         MemberInfoResponse response = userProfileService.setMemberInfo(session, request);
@@ -60,7 +60,7 @@ public class UserProfileController {
     }
 
     @Operation(summary = "프로필 사진 추가", description = "Response : 설정한 프로필 사진 URL")
-    @PostMapping(value = "profile/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "profile/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DataResponse<String> profileUpload(@CurrentSession Session session,
                                         @RequestPart(value = "profile") MultipartFile image) {
         String uri = userProfileService.profileUpload(session, image);
@@ -68,7 +68,7 @@ public class UserProfileController {
     }
 
     @Operation(summary = "프로필 사진 삭제", description = "Response : default profile image URL")
-    @PostMapping("profile/delete")
+    @PatchMapping("profile/delete")
     public DataResponse<String> profileDelete(@CurrentSession Session session) {
         String uri = userProfileService.profileDelete(session);
         return DataResponse.of(uri);
