@@ -19,6 +19,17 @@ public class CONSTANT {
 
     // default image path
     private static final String imagePrefix = "https://bangwool-images.s3.ap-northeast-2.amazonaws.com/";
+
     public static final URI DEFAULT_PROFILE = URI.create(imagePrefix + "default-profile.jpg");
+
+    // public static final URI DEFAULT_COS_BASIC = URI.create(imagePrefix + "default-cos-basic.jpg");
+    // public static final URI DEFAULT_COS_BASE = URI.create(imagePrefix + "default-cos-base.jpg");
+    // public static final URI DEFAULT_COS_COLOR = URI.create(imagePrefix + "default-cos-color.jpg");
+    // public static final URI DEFAULT_COS_OTHERS = URI.create(imagePrefix + "default-cos-others.jpg");
+
+    public static final URI DEFAULT_COS_BASIC = URI.create(imagePrefix + "default-profile.jpg");
+    public static final URI DEFAULT_COS_BASE = URI.create(imagePrefix + "default-profile.jpg");
+    public static final URI DEFAULT_COS_COLOR = URI.create(imagePrefix + "default-profile.jpg");
+    public static final URI DEFAULT_COS_OTHERS = URI.create(imagePrefix + "default-profile.jpg");
 
 }
