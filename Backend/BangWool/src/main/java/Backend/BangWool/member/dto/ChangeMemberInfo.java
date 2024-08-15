@@ -34,4 +34,8 @@ public class ChangeMemberInfo {
         return Objects.equals(nickname, that.nickname) && Objects.equals(googleId, that.googleId) && Objects.equals(kakaoId, that.kakaoId);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(nickname, googleId, kakaoId);
+    }
 }

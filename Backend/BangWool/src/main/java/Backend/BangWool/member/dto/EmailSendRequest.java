@@ -28,4 +28,8 @@ public class EmailSendRequest {
         return Objects.equals(email, request.email);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
+    }
 }

@@ -31,8 +31,12 @@ public class SetPasswordRequest {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof SetPasswordRequest that)) return false;
-        return Objects.equals(email, that.email) && Objects.equals(password1, that.password1) && Objects.equals(password2, that.password2);
+        if (!(o instanceof SetPasswordRequest request)) return false;
+        return Objects.equals(email, request.email) && Objects.equals(password1, request.password1) && Objects.equals(password2, request.password2);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, password1, password2);
+    }
 }

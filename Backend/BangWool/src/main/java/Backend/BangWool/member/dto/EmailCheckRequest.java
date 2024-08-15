@@ -28,8 +28,14 @@ public class EmailCheckRequest {
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
         if (!(o instanceof EmailCheckRequest request)) return false;
         return Objects.equals(email, request.email) && Objects.equals(code, request.code);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email, code);
     }
 }

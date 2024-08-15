@@ -34,4 +34,8 @@ public class ChangePasswordRequest {
         return Objects.equals(prevPassword, request.prevPassword) && Objects.equals(password1, request.password1) && Objects.equals(password2, request.password2);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(prevPassword, password1, password2);
+    }
 }

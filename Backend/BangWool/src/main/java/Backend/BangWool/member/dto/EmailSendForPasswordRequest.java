@@ -33,9 +33,13 @@ public class EmailSendForPasswordRequest extends EmailSendRequest {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof EmailSendForPasswordRequest that)) return false;
+        if (!(o instanceof EmailSendForPasswordRequest request)) return false;
         if (!super.equals(o)) return false;
-        return Objects.equals(name, that.name) && Objects.equals(birth, that.birth);
+        return Objects.equals(name, request.name) && Objects.equals(birth, request.birth);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, birth);
+    }
 }
