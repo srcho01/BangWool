@@ -226,18 +226,18 @@ public class UserProfileServiceTest {
     @Test
     void withdrawalFail() {
         // given
-        int memberId = session.getId();
+        Long id = session.getId();
 
         // when & then
         NotFoundException e = assertThrows(NotFoundException.class, () -> userProfileService.withdrawal(session));
-        assertThat(e.getMessage()).isEqualTo("Member with id " + memberId + " not found");
+        assertThat(e.getMessage()).isEqualTo("Member with id " + id + " not found");
     }
 
     @DisplayName("회원 탈퇴 - 성공")
     @Test
     void withdrawalSuccess() {
         // given
-        int memberId = session.getId();
+        Long id = session.getId();
 
         // mocking
         when(memberRepository.existsById(session.getId())).thenReturn(true);
@@ -246,7 +246,7 @@ public class UserProfileServiceTest {
         userProfileService.withdrawal(session);
 
         // then
-        verify(memberRepository, times(1)).deleteById(memberId);
+        verify(memberRepository, times(1)).deleteById(id);
     }
 
 }

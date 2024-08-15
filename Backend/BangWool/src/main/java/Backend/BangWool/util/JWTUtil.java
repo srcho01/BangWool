@@ -24,11 +24,11 @@ public class JWTUtil {
     }
 
     // 토큰 발급
-    public String generateToken(String category, int memberID, String username, String role, Long expiredSec) {
+    public String generateToken(String category, Long id, String username, String role, Long expiredSec) {
         long expiredMs = expiredSec * 1000;
         return Jwts.builder()
                 .claim("category", category)
-                .claim("id", memberID)
+                .claim("id", id)
                 .claim("username", username)
                 .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -52,8 +52,8 @@ public class JWTUtil {
     }
 
     // id 가져오기
-    public int getMemberID(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("id", Integer.class);
+    public Long getId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("id", Long.class);
     }
 
     // 토큰 유저 이름 추출

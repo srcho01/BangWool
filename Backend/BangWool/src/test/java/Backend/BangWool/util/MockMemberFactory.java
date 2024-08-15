@@ -14,7 +14,7 @@ public class MockMemberFactory implements WithSecurityContextFactory<WithMockMem
 
         SecurityContext context = SecurityContextHolder.createEmptyContext();
 
-        Session session = new Session(annotation.memberID(), annotation.username(), annotation.role());
+        Session session = new Session(annotation.id(), annotation.username(), annotation.role());
         Authentication authToken = new UsernamePasswordAuthenticationToken(session, null, session.getAuthorities());
         context.setAuthentication(authToken);
 

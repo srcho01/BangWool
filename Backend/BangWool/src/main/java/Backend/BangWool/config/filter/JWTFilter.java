@@ -65,7 +65,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
         // 토큰에서 정보 획득
         String category = jwtUtil.getCategory(token);
-        int memberID = jwtUtil.getMemberID(token);
+        Long id = jwtUtil.getId(token);
         String username = jwtUtil.getUsername(token);
         String role = jwtUtil.getRole(token);
 
@@ -83,7 +83,7 @@ public class JWTFilter extends OncePerRequestFilter {
 
 
         // 매 요청마다 ContextHolder에 Authentication 추가 (왜냐하면 Stateless이니까)
-        Session session = new Session(memberID, username, role);
+        Session session = new Session(id, username, role);
         Authentication authToken = new UsernamePasswordAuthenticationToken(session, null, session.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authToken); // user session 생성
 

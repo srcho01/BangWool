@@ -9,7 +9,7 @@ import java.lang.annotation.RetentionPolicy;
 @WithSecurityContext(factory = MockMemberFactory.class)
 public @interface WithMockMember {
 
-    int memberID() default 1;
+    long id() default 1L;
     String username() default "test@test.com";
     String role() default "ROLE_USER";
 

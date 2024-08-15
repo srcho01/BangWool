@@ -16,7 +16,7 @@ import java.util.Collection;
 @Builder
 public class Session implements UserDetails {
 
-    private int id;
+    private Long id;
     private String username; // 유저의 이메일
     private String role;
 

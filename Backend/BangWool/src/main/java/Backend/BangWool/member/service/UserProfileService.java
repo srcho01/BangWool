@@ -55,7 +55,7 @@ public class UserProfileService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         return MemberInfoResponse.builder()
-                .memberID(member.getMemberID())
+                .id(member.getId())
                 .email(member.getEmail())
                 .name(member.getName())
                 .nickname(member.getNickname())
@@ -84,7 +84,7 @@ public class UserProfileService {
         memberRepository.save(member);
 
         return MemberInfoResponse.builder()
-                .memberID(member.getMemberID())
+                .id(member.getId())
                 .email(member.getEmail())
                 .name(member.getName())
                 .nickname(member.getNickname())
@@ -105,7 +105,7 @@ public class UserProfileService {
 
     public String profileUpload(Session session, MultipartFile image) {
         // get member entity
-        int id = session.getId();
+        Long id = session.getId();
         MemberEntity member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
@@ -121,7 +121,7 @@ public class UserProfileService {
 
     public String profileDelete(Session session) {
         // get member entity
-        int id = session.getId();
+        Long id = session.getId();
         MemberEntity member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 

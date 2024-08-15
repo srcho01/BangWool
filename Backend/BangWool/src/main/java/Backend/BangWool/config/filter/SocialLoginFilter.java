@@ -81,7 +81,7 @@ public class SocialLoginFilter extends UsernamePasswordAuthenticationFilter {
 
         // 주체(principal)이란. 일반적으로 사용자 이름이나 사용자 정보를 나타내는 객체
         String username = customUserDetails.getUsername();
-        int memberID = customUserDetails.getMemberID();
+        Long id = customUserDetails.getId();
 
         // role 알아내기
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -90,8 +90,8 @@ public class SocialLoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         // token 만들기 (expiredSec : 초 단위)
-        String access = jwtUtil.generateToken("access", memberID, username, role, CONSTANT.ACCESS_EXPIRED);
-        String refresh = jwtUtil.generateToken("refresh", memberID, username, role, CONSTANT.REFRESH_EXPIRED);
+        String access = jwtUtil.generateToken("access", id, username, role, CONSTANT.ACCESS_EXPIRED);
+        String refresh = jwtUtil.generateToken("refresh", id, username, role, CONSTANT.REFRESH_EXPIRED);
 
         // refresh 토큰 redis 저장
         redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + refresh, "valid", CONSTANT.REFRESH_EXPIRED);

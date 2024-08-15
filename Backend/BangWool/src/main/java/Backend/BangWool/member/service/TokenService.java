@@ -35,7 +35,7 @@ public class TokenService {
 
         // 정보 가져오기
         String category = jwtUtil.getCategory(refresh);
-        int memberID = jwtUtil.getMemberID(refresh);
+        Long id = jwtUtil.getId(refresh);
         String username = jwtUtil.getUsername(refresh);
         String role = jwtUtil.getRole(refresh);
         long issuedAt = jwtUtil.getIssuedAt(refresh);
@@ -54,8 +54,8 @@ public class TokenService {
         redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + refresh, "invalid", expire);
 
         // token 재발급 (RTR 방식으로 둘 다 재발급)
-        String access = jwtUtil.generateToken("access", memberID, username, role, CONSTANT.ACCESS_EXPIRED);
-        refresh = jwtUtil.generateToken("refresh", memberID, username, role, CONSTANT.REFRESH_EXPIRED);
+        String access = jwtUtil.generateToken("access", id, username, role, CONSTANT.ACCESS_EXPIRED);
+        refresh = jwtUtil.generateToken("refresh", id, username, role, CONSTANT.REFRESH_EXPIRED);
 
         // 새 refresh 토큰 redis 저장
         redisUtil.setDataExpire(CONSTANT.REDIS_TOKEN + refresh, "valid", CONSTANT.REFRESH_EXPIRED);

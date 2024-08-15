@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class MemberInfoResponse {
 
     @Schema(example = "1")
-    private int memberID;
+    private Long id;
 
     @Schema(example = "test@test.com")
     private String email;
