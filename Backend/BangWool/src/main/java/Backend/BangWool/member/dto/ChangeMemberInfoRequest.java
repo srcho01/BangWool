@@ -15,7 +15,7 @@ import java.util.Objects;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChangeMemberInfo {
+public class ChangeMemberInfoRequest {
 
     @Schema(example = "방울이")
     @NotEmpty(message = "Nickname is Required")
@@ -30,7 +30,7 @@ public class ChangeMemberInfo {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ChangeMemberInfo that)) return false;
+        if (!(o instanceof ChangeMemberInfoRequest that)) return false;
         return Objects.equals(nickname, that.nickname) && Objects.equals(googleId, that.googleId) && Objects.equals(kakaoId, that.kakaoId);
     }
 

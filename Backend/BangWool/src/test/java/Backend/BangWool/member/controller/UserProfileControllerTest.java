@@ -1,7 +1,7 @@
 package Backend.BangWool.member.controller;
 
 import Backend.BangWool.config.TestSecurityConfig;
-import Backend.BangWool.member.dto.ChangeMemberInfo;
+import Backend.BangWool.member.dto.ChangeMemberInfoRequest;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.Session;
@@ -139,7 +139,7 @@ public class UserProfileControllerTest {
     void setMemberInfoFail() throws Exception {
         // given
         String email = session.getUsername();
-        ChangeMemberInfo request = ChangeMemberInfo.builder()
+        ChangeMemberInfoRequest request = ChangeMemberInfoRequest.builder()
                 .nickname("newname")
                 .googleId("google")
                 .kakaoId("prev")

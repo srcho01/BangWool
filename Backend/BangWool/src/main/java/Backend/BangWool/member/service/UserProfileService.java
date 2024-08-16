@@ -4,7 +4,7 @@ import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.image.service.S3ImageService;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.ChangeMemberInfo;
+import Backend.BangWool.member.dto.ChangeMemberInfoRequest;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.Session;
@@ -66,7 +66,7 @@ public class UserProfileService {
                 .build();
     }
 
-    public MemberInfoResponse setMemberInfo(Session session, ChangeMemberInfo request) {
+    public MemberInfoResponse setMemberInfo(Session session, ChangeMemberInfoRequest request) {
 
         String email = session.getUsername();
 

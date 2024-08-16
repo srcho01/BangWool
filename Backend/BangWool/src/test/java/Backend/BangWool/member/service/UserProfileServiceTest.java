@@ -3,7 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.member.domain.MemberEntity;
-import Backend.BangWool.member.dto.ChangeMemberInfo;
+import Backend.BangWool.member.dto.ChangeMemberInfoRequest;
 import Backend.BangWool.member.dto.ChangePasswordRequest;
 import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.Session;
@@ -172,7 +172,7 @@ public class UserProfileServiceTest {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
         String email = session.getUsername();
-        ChangeMemberInfo request = ChangeMemberInfo.builder()
+        ChangeMemberInfoRequest request = ChangeMemberInfoRequest.builder()
                 .nickname("test")
                 .googleId(null)
                 .build();
@@ -198,7 +198,7 @@ public class UserProfileServiceTest {
         // 수정 가능 항목 : 닉네임, 카카오아이디, 구글 아이디
         // given
         String email = session.getUsername();
-        ChangeMemberInfo request = ChangeMemberInfo.builder()
+        ChangeMemberInfoRequest request = ChangeMemberInfoRequest.builder()
                 .nickname("test")
                 .googleId("wnefpivnjwofi")
                 .build();
