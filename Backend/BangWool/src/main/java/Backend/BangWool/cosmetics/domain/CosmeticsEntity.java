@@ -32,6 +32,7 @@ public class CosmeticsEntity {
     @Column(nullable = false)
     private LocalDate expirationDate;
 
+    @Setter
     private LocalDate startDate;
 
     @Column(nullable = false)
