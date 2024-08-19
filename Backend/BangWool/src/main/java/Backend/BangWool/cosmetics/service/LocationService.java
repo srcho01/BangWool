@@ -24,18 +24,25 @@ public class LocationService {
     private final LocationRepository locationRepository;
 
 
-    public List<String> create(Session session, String name) {
+    public void create(Session session, String name) {
+        // 위치 이름 길이 체크
         validateLocationName(name);
 
-        LocationEntity location = LocationEntity.builder().name(name).build();
-
+        // 부모 가져오기
         MemberEntity parent = getMember(session.getId());
+
+        // 이미 존재하는 옵션인지 체크
+        if (locationRepository.existsByMemberAndName(parent, name)) {
+            return;
+        }
+
+        // 옵션 생성
+        LocationEntity location = LocationEntity.builder().name(name).build();
         parent.addLocation(location);
 
+        // 옵션 DB 업데이트
         locationRepository.save(location);
         memberRepository.save(parent);
-
-        return read(session);
     }
 
     public List<String> read(Session session) {
