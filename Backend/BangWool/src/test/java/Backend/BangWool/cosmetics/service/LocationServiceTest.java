@@ -8,14 +8,12 @@ import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.repository.MemberRepository;
-import Backend.BangWool.util.WithMockMember;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -28,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-@WithMockMember
 class LocationServiceTest {
 
     @Autowired private MemberRepository memberRepository;
@@ -39,31 +36,48 @@ class LocationServiceTest {
     private MemberEntity member;
     private Session session;
 
-
     @BeforeEach
     void setUp() {
-        member = MemberEntity.builder()
+        this.member = MemberEntity.builder()
                 .email("test@test.com")
                 .password("test1234!!")
                 .birth(LocalDate.of(2000, 1, 1))
                 .name("test")
                 .nickname("springtest").build();
-        memberRepository.save(member);
+        memberRepository.save(this.member);
 
-        this.session = (Session) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        this.session.setId(member.getId());
+        this.session = Session.builder()
+                .id(this.member.getId())
+                .username(this.member.getEmail())
+                .build();
     }
 
 
-    @DisplayName("위치 옵션 생성 - 실패")
+    @DisplayName("위치 옵션 생성 - 에러 : 이름이 너무 긺")
     @Test
-    void createFail() {
+    void createFail1() {
         // given
         String name = "12345678901234567890";
 
         // when & then
         BadRequestException e = assertThrows(BadRequestException.class, () -> locationService.create(session, name));
         assertThat(e.getMessage()).isEqualTo("Location name should be between 1 and 10 characters");
+    }
+
+    @DisplayName("위치 옵션 생성 - 실패 : 이미 존재하는 옵션")
+    @Test
+    void createFail2() {
+        // given
+        String name = "123456";
+
+        // when
+        locationService.create(session, name);
+        locationService.create(session, name);
+
+        // then
+        MemberEntity afterMember = memberRepository.findById(session.getId()).orElseThrow();
+        int numLocOpts = afterMember.getLocationOptions().size();
+        assertThat(numLocOpts).isEqualTo(1);
     }
 
     @DisplayName("위치 옵션 생성 - 성공")
@@ -73,16 +87,12 @@ class LocationServiceTest {
         String name = "123456";
 
         // when
-        List<String> result = locationService.create(session, name);
+        locationService.create(session, name);
 
         // then
-        Set<String> givenSet = new HashSet<>();
-        givenSet.add(name);
-        Set<String> resultSet = new HashSet<>(result);
         LocationEntity location = member.getLocationOptions().getFirst();
-
-        assertThat(givenSet).isEqualTo(resultSet);
         assertThat(location.getMember()).isEqualTo(member);
+        assertThat(location.getName()).isEqualTo(name);
     }
 
 
