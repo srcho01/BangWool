@@ -15,11 +15,10 @@ import java.util.Map;
 @Builder
 public class LocationUpdateRequest {
 
-    @Schema(example = """
-            {
-                "옵션1 전": "옵션1 후",
-                "옵션2 전": "옵션2 후",
-            }""")
+    @Schema(example = "{\n" +
+            "    \"옵션1 전\": \"옵션1 후\",\n" +
+            "    \"옵션2 전\": \"옵션2 후\"\n" +
+            "}")
     Map<String, String> options;
 
 }
