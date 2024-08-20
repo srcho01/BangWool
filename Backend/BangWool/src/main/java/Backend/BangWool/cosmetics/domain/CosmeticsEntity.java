@@ -1,12 +1,10 @@
 package Backend.BangWool.cosmetics.domain;
 
+import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.util.CONSTANT;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -14,6 +12,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class CosmeticsEntity {
 
     @Id
@@ -23,10 +22,12 @@ public class CosmeticsEntity {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     @Setter
+    @EqualsAndHashCode.Exclude
     private MemberEntity member;
 
 
     @Column(nullable = false)
+    @Setter
     private String name;
 
     @Column(nullable = false)
@@ -44,21 +45,14 @@ public class CosmeticsEntity {
     private LocationEntity location;
 
     @Column(nullable = false)
+    @Setter
     private URI image;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Setter
     private Category category;
-    
-    public enum Category {
-        basic, base, color, others
-    }
 
-
-    @Builder
-    public CosmeticsEntity(String name, LocalDate expirationDate, Category category, LocationEntity location) {
-        this(name, expirationDate, category, location, getDefaultImage(category));
-    }
 
     @Builder
     public CosmeticsEntity(String name, LocalDate expirationDate, Category category, LocationEntity location, URI image) {
@@ -66,7 +60,7 @@ public class CosmeticsEntity {
         this.expirationDate = expirationDate;
         this.category = category;
         this.location = location;
-        this.image = image;
+        this.image = image == null ? getDefaultImage(category) : image;
         this.status = 0;
     }
 
@@ -77,6 +71,15 @@ public class CosmeticsEntity {
             case color -> CONSTANT.DEFAULT_COS_COLOR;
             case others -> CONSTANT.DEFAULT_COS_OTHERS;
         };
+    }
+
+
+    public void setStatus(int status) {
+        if (this.status <= status) {
+            this.status = status;
+        } else {
+            throw new ServerException("Status can only proceed");
+        }
     }
 
 }
