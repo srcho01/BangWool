@@ -6,6 +6,7 @@ import Backend.BangWool.cosmetics.dto.LocationUpdateRequest;
 import Backend.BangWool.cosmetics.repository.LocationRepository;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.NotFoundException;
+import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.repository.MemberRepository;
@@ -24,7 +25,7 @@ public class LocationService {
     private final LocationRepository locationRepository;
 
 
-    public void create(Session session, String name) {
+    public LocationEntity create(Session session, String name) {
         // 위치 이름 길이 체크
         validateLocationName(name);
 
@@ -33,7 +34,8 @@ public class LocationService {
 
         // 이미 존재하는 옵션인지 체크
         if (locationRepository.existsByMemberAndName(parent, name)) {
-            return;
+            return locationRepository.findByMemberAndName(parent, name)
+                    .orElseThrow(() -> new ServerException("Invalid location"));
         }
 
         // 옵션 생성
@@ -41,8 +43,10 @@ public class LocationService {
         parent.addLocation(location);
 
         // 옵션 DB 업데이트
-        locationRepository.save(location);
+        LocationEntity saved = locationRepository.save(location);
         memberRepository.save(parent);
+
+        return saved;
     }
 
     public List<String> read(Session session) {

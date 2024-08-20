@@ -1,5 +1,6 @@
 package Backend.BangWool.cosmetics.service;
 
+import Backend.BangWool.cosmetics.domain.Category;
 import Backend.BangWool.cosmetics.domain.CosmeticsEntity;
 import Backend.BangWool.cosmetics.domain.LocationEntity;
 import Backend.BangWool.cosmetics.dto.LocationUpdateRequest;
@@ -87,9 +88,11 @@ class LocationServiceTest {
         String name = "123456";
 
         // when
-        locationService.create(session, name);
+        LocationEntity result = locationService.create(session, name);
 
         // then
+        assertThat(result.getName()).isEqualTo(name);
+
         LocationEntity location = member.getLocationOptions().getFirst();
         assertThat(location.getMember()).isEqualTo(member);
         assertThat(location.getName()).isEqualTo(name);
@@ -169,7 +172,7 @@ class LocationServiceTest {
         CosmeticsEntity cosmetics = CosmeticsEntity.builder()
                 .name(option)
                 .expirationDate(LocalDate.of(2000, 1, 1))
-                .category(CosmeticsEntity.Category.base)
+                .category(Category.base)
                 .location(location)
                 .build();
 
