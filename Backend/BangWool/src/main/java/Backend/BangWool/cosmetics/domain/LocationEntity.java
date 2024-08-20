@@ -2,14 +2,12 @@ package Backend.BangWool.cosmetics.domain;
 
 import Backend.BangWool.member.domain.MemberEntity;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class LocationEntity {
 
     @Id
@@ -19,6 +17,7 @@ public class LocationEntity {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     @Setter
+    @EqualsAndHashCode.Exclude
     private MemberEntity member;
 
     @Column(nullable = false)
