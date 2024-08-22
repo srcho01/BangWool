@@ -1,10 +1,10 @@
 package Backend.BangWool.member.controller;
 
-import Backend.BangWool.exception.ServerException;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
+import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.service.SignUpService;
-import Backend.BangWool.response.StatusResponse;
+import Backend.BangWool.response.DataResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -22,20 +22,19 @@ public class SignUpController {
 
     private final SignUpService signUpService;
 
+
     @Operation(summary = "자체 회원가입")
     @PostMapping("local")
-    public StatusResponse localSignUp(@Valid @RequestBody LocalSignUpRequest signUpRequestDto) {
-        if (signUpService.localSignUp(signUpRequestDto))
-            return StatusResponse.of(200);
-        throw new ServerException("Internal Server Error");
+    public DataResponse<MemberInfoResponse> localSignUp(@Valid @RequestBody LocalSignUpRequest request) {
+        MemberInfoResponse response = signUpService.localSignUp(request);
+        return DataResponse.of(response);
     }
 
     @Operation(summary = "소셜 회원가입", description = "※ googleId와 kakaoId 둘 다 없으면 안됩니다 ※")
     @PostMapping("oauth")
-    public StatusResponse socialSignUp(@Valid @RequestBody OAuthSignUpRequest signUpRequestDto) {
-        if (signUpService.socialSignUp(signUpRequestDto))
-            return StatusResponse.of(200);
-        throw new ServerException("Internal Server Error");
+    public DataResponse<MemberInfoResponse> socialSignUp(@Valid @RequestBody OAuthSignUpRequest request) {
+        MemberInfoResponse response = signUpService.socialSignUp(request);
+        return DataResponse.of(response);
     }
 
 }

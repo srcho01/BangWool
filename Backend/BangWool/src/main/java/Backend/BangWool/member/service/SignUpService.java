@@ -3,6 +3,7 @@ package Backend.BangWool.member.service;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
+import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.util.CONSTANT;
@@ -22,8 +23,7 @@ public class SignUpService {
     private final UserAccountService userAccountService;
 
     @Transactional
-    public boolean localSignUp(LocalSignUpRequest data) {
-
+    public MemberInfoResponse localSignUp(LocalSignUpRequest data) {
         // member 중복 체크
         if (memberRepository.existsByEmail(data.getEmail()))
             throw new BadRequestException("User is already registered.");
@@ -51,11 +51,12 @@ public class SignUpService {
         redisUtil.deleteData(CONSTANT.REDIS_EMAIL_CODE);
         redisUtil.deleteData(CONSTANT.REDIS_EMAIL_VERIFY);
 
-        return true;
+        // 생성한 회원정보 return
+        return returnMemberInfo(memberEntity);
     }
 
     @Transactional
-    public boolean socialSignUp(OAuthSignUpRequest data) {
+    public MemberInfoResponse socialSignUp(OAuthSignUpRequest data) {
 
         // email 중복 체크
         if (memberRepository.existsByEmail(data.getEmail()))
@@ -82,7 +83,8 @@ public class SignUpService {
         // 저장
         memberRepository.save(memberEntity);
 
-        return true;
+        // 생성한 회원정보 return
+        return returnMemberInfo(memberEntity);
     }
 
     private void checkSocialId(String googleId, String kakaoId) {
@@ -93,6 +95,19 @@ public class SignUpService {
         // 중복 google ID, kakao ID 검사
         if ((googleId != null && memberRepository.existsByGoogleId(googleId)) || (kakaoId != null && memberRepository.existsByKakaoId(kakaoId)))
             throw new BadRequestException("This social account is already registered");
+    }
+
+    private MemberInfoResponse returnMemberInfo(MemberEntity memberEntity) {
+        return MemberInfoResponse.builder()
+                .id(memberEntity.getId())
+                .email(memberEntity.getEmail())
+                .name(memberEntity.getName())
+                .nickname(memberEntity.getNickname())
+                .birth(memberEntity.getBirth())
+                .googleId(memberEntity.getGoogleId())
+                .kakaoId(memberEntity.getKakaoId())
+                .profileUrl(memberEntity.getProfileImage())
+                .build();
     }
 
 }

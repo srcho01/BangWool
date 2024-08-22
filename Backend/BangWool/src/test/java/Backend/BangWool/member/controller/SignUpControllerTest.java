@@ -2,8 +2,10 @@ package Backend.BangWool.member.controller;
 
 import Backend.BangWool.config.TestSecurityConfig;
 import Backend.BangWool.member.dto.LocalSignUpRequest;
+import Backend.BangWool.member.dto.MemberInfoResponse;
 import Backend.BangWool.member.dto.OAuthSignUpRequest;
 import Backend.BangWool.member.service.SignUpService;
+import Backend.BangWool.response.DataResponse;
 import Backend.BangWool.response.StatusResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -120,11 +122,18 @@ class SignUpControllerTest {
                 .birth(LocalDate.of(2000, 3, 12)).build();
         String requestJson = objectMapper.writeValueAsString(request);
 
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                .email("test@test.com")
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 3, 12))
+                .build();
+
         // when
-        when(signUpService.localSignUp(any(LocalSignUpRequest.class))).thenReturn(true);
+        when(signUpService.localSignUp(any(LocalSignUpRequest.class))).thenReturn(response);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
         mvc.perform(post("/auth/signup/local")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
@@ -209,11 +218,20 @@ class SignUpControllerTest {
                 .build();
         String requestJson = objectMapper.writeValueAsString(request);
 
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                .email("test@test.com")
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 3, 12))
+                .googleId("awofijlkfjn")
+                .kakaoId("984621685461")
+                .build();
+
         // when
-        when(signUpService.socialSignUp(any(OAuthSignUpRequest.class))).thenReturn(true);
+        when(signUpService.socialSignUp(any(OAuthSignUpRequest.class))).thenReturn(response);
 
         // then
-        String responseJson = objectMapper.writeValueAsString(StatusResponse.of(200));
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
         mvc.perform(post("/auth/signup/oauth")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson))
