@@ -90,6 +90,7 @@ class CosmeticsServiceTest {
                 .expirationDate(LocalDate.of(2024, 8, 12))
                 .location(location)
                 .category(Category.color)
+                .image(CONSTANT.DEFAULT_COS_COLOR)
                 .build();
 
         // mocking
@@ -105,6 +106,7 @@ class CosmeticsServiceTest {
         verify(cosmeticsRepository, times(1)).save(cosmetics);
 
         member.addCosmetics(cosmetics);
+        member.addLocation(location);
         verify(memberRepository, times(1)).save(member);
     }
 
@@ -151,11 +153,12 @@ class CosmeticsServiceTest {
         // then
         verify(locationService, times(1)).create(session, "table");
         verify(memberRepository, times(1)).getReferenceById(session.getId());
-        verify(cosmeticsRepository, times(2)).save(any(CosmeticsEntity.class));
-        verify(s3ImageService, times(1)).upload(image, "1_null", 512, true);
+        verify(cosmeticsRepository, times(1)).save(any(CosmeticsEntity.class));
+        verify(s3ImageService, times(1)).upload(image, "cosmetics" + session.getId(), 512, true);
 
         cosmetics.setImage(uri);
         member.addCosmetics(cosmetics);
+        member.addLocation(location);
         verify(memberRepository, times(1)).save(member);
     }
 

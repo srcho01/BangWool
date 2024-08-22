@@ -4,6 +4,7 @@ import Backend.BangWool.cosmetics.domain.Category;
 import Backend.BangWool.cosmetics.domain.CosmeticsEntity;
 import Backend.BangWool.cosmetics.domain.LocationEntity;
 import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
+import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
 import Backend.BangWool.cosmetics.repository.CosmeticsRepository;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.image.service.S3ImageService;
@@ -29,7 +30,7 @@ public class CosmeticsService {
 
 
     @Transactional
-    public void create(Session session, CosmeticsCreateRequest request, MultipartFile image) {
+    public CosmeticsInfoResponse create(Session session, CosmeticsCreateRequest request, MultipartFile image) {
         // category 검사
         if (!Category.contains(request.getCategory())) {
             throw new BadRequestException("IllegalArgumentException - Invalid category \"" + request.getCategory() + "\"");
@@ -37,6 +38,9 @@ public class CosmeticsService {
 
         // 위치 생성
         LocationEntity location = locationService.create(session, request.getLocation());
+
+        // member 가져오기
+        MemberEntity member = memberRepository.getReferenceById(session.getId());
 
         // 화장품 entity 생성
         CosmeticsEntity cosmetics = CosmeticsEntity.builder()
@@ -48,19 +52,33 @@ public class CosmeticsService {
 
         // 사진 생성
         if (image != null && !image.isEmpty()) {
-            CosmeticsEntity saved = cosmeticsRepository.save(cosmetics);
-            String filename = String.valueOf(session.getId()) + "_" + String.valueOf(saved.getId());
+            String filename = "cosmetics" + String.valueOf(session.getId());
             URI uri = s3ImageService.upload(image, filename, 512, true);
-
             cosmetics.setImage(uri);
         }
 
         // 리포지토리 저장
-        MemberEntity member = memberRepository.getReferenceById(session.getId());
         member.addCosmetics(cosmetics);
         cosmeticsRepository.save(cosmetics);
         memberRepository.save(member);
 
+        return makeCosmeticsInfoResponse(member, cosmetics, location);
+    }
+
+
+    private CosmeticsInfoResponse makeCosmeticsInfoResponse(MemberEntity member, CosmeticsEntity cosmetics, LocationEntity location) {
+        return CosmeticsInfoResponse.builder()
+                .id(cosmetics.getId())
+                .memberId(member.getId())
+                .memberEmail(member.getEmail())
+                .name(cosmetics.getName())
+                .category(cosmetics.getCategory())
+                .expirationDate(cosmetics.getExpirationDate())
+                .startDate(cosmetics.getStartDate())
+                .status(cosmetics.getStatus())
+                .locationName(location.getName())
+                .image(cosmetics.getImage())
+                .build();
     }
 
 }
