@@ -162,7 +162,16 @@ public class UserProfileServiceTest {
         MemberInfoResponse result = userProfileService.getMemberInfo(session);
 
         // then
-        assertThat(result).isInstanceOf(MemberInfoResponse.class);
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                .email(email)
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("anfiuownen")
+                .kakaoId("12198964732")
+                .profileUrl(CONSTANT.DEFAULT_PROFILE)
+                .build();
+        assertThat(result).isEqualTo(response);
     }
 
 
@@ -218,7 +227,16 @@ public class UserProfileServiceTest {
         MemberInfoResponse result = userProfileService.setMemberInfo(session, request);
 
         // then
-        assertThat(result).isInstanceOf(MemberInfoResponse.class);
+        MemberInfoResponse response = MemberInfoResponse.builder()
+                .email(email)
+                .name("test")
+                .nickname("test")
+                .birth(LocalDate.of(2000, 1, 1))
+                .googleId("wnefpivnjwofi")
+                .profileUrl(CONSTANT.DEFAULT_PROFILE)
+                .build();
+
+        assertThat(result).isEqualTo(response);
     }
 
 
