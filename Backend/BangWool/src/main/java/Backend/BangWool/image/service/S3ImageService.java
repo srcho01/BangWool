@@ -85,8 +85,10 @@ public class S3ImageService {
         String s3Filename;
         if (okToOverride && !filename.isEmpty()) {
             s3Filename = filename + ".jpg";
+        } else if (filename.isEmpty()){
+            s3Filename = UUID.randomUUID() + ".jpg";
         } else {
-            s3Filename = UUID.randomUUID() + filename + ".jpg";
+            s3Filename = filename + "_" + UUID.randomUUID() + ".jpg";
         }
 
         // 이미지 resizing
