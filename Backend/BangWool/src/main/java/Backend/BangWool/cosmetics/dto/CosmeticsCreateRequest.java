@@ -12,7 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
-@Schema(description = "Change Member Info DTO")
+@Schema(description = "Cosmetics create request DTO")
 @Getter
 @Builder
 @AllArgsConstructor
