@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(exclude = {"member"})
 public class CosmeticsEntity {
 
     @Id
@@ -22,7 +22,6 @@ public class CosmeticsEntity {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     @Setter
-    @EqualsAndHashCode.Exclude
     private MemberEntity member;
 
 

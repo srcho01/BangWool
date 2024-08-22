@@ -7,7 +7,7 @@ import lombok.*;
 @Entity
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(exclude = {"member"})
 public class LocationEntity {
 
     @Id
@@ -17,7 +17,6 @@ public class LocationEntity {
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     @Setter
-    @EqualsAndHashCode.Exclude
     private MemberEntity member;
 
     @Column(nullable = false)
