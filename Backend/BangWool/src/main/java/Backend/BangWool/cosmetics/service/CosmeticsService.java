@@ -52,7 +52,7 @@ public class CosmeticsService {
 
         // 사진 생성
         if (image != null && !image.isEmpty()) {
-            String filename = "cosmetics" + String.valueOf(session.getId());
+            String filename = "cosmetics" + session.getId();
             URI uri = s3ImageService.upload(image, filename, 512, false);
             cosmetics.setImage(uri);
         }
