@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode(exclude = {"member"})
+@EqualsAndHashCode(exclude = {"id", "member"})
 public class CosmeticsEntity {
 
     @Id
