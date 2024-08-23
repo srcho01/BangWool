@@ -41,7 +41,7 @@ public class CosmeticsInfoResponse {
     @Schema(example = "0")
     private int status;
 
-    @Schema(example = "")
+    @Schema(example = "화장대 위")
     private String locationName;
 
     @Schema(example = "https://bangwool-images.s3.ap-northeast-2.amazonaws.com/default-base.jpg")
