@@ -154,7 +154,7 @@ class CosmeticsServiceTest {
         verify(locationService, times(1)).create(session, "table");
         verify(memberRepository, times(1)).getReferenceById(session.getId());
         verify(cosmeticsRepository, times(1)).save(any(CosmeticsEntity.class));
-        verify(s3ImageService, times(1)).upload(image, "cosmetics" + session.getId(), 512, true);
+        verify(s3ImageService, times(1)).upload(image, "cosmetics" + session.getId(), 512, false);
 
         cosmetics.setImage(uri);
         member.addCosmetics(cosmetics);

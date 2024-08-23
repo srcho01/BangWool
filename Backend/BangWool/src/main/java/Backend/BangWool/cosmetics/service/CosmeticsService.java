@@ -53,7 +53,7 @@ public class CosmeticsService {
         // 사진 생성
         if (image != null && !image.isEmpty()) {
             String filename = "cosmetics" + String.valueOf(session.getId());
-            URI uri = s3ImageService.upload(image, filename, 512, true);
+            URI uri = s3ImageService.upload(image, filename, 512, false);
             cosmetics.setImage(uri);
         }
 
@@ -62,11 +62,11 @@ public class CosmeticsService {
         cosmeticsRepository.save(cosmetics);
         memberRepository.save(member);
 
-        return makeCosmeticsInfoResponse(member, cosmetics, location);
+        return setCosmeticsInfoResponse(member, cosmetics, location);
     }
 
 
-    private CosmeticsInfoResponse makeCosmeticsInfoResponse(MemberEntity member, CosmeticsEntity cosmetics, LocationEntity location) {
+    private CosmeticsInfoResponse setCosmeticsInfoResponse(MemberEntity member, CosmeticsEntity cosmetics, LocationEntity location) {
         return CosmeticsInfoResponse.builder()
                 .id(cosmetics.getId())
                 .memberId(member.getId())
