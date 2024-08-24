@@ -62,7 +62,7 @@ class LocationServiceTest {
 
         // when & then
         BadRequestException e = assertThrows(BadRequestException.class, () -> locationService.create(session, name));
-        assertThat(e.getMessage()).isEqualTo("Location name should be between 1 and 10 characters");
+        assertThat(e.getMessage()).isEqualTo("Location option \"12345678901234567890\" should be between 1 and 10 characters");
     }
 
     @DisplayName("위치 옵션 생성 - 실패 : 이미 존재하는 옵션")
@@ -120,6 +120,28 @@ class LocationServiceTest {
         assertThat(givenSet).isEqualTo(resultSet);
     }
 
+
+    @DisplayName("위치 옵션 수정 - 에러 : 10자 초과")
+    @Test
+    void updateFail() {
+        // given
+        Map<String, String> updateOptions = Map.of(
+                "option1", "OPTION10000000000000000000",
+                "option2", "OPTION2",
+                "option3", "OPTION3"
+        );
+        LocationUpdateRequest request = LocationUpdateRequest.builder().options(updateOptions).build();
+
+        for (String option : updateOptions.keySet()) {
+            LocationEntity location = LocationEntity.builder().name(option).build();
+            member.addLocation(location);
+            locationRepository.save(location);
+        }
+
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> locationService.update(session, request));
+        assertThat(e.getMessage()).isEqualTo("Location option " + "\"OPTION10000000000000000000\"" + " should be between 1 and 10 characters");
+    }
 
     @DisplayName("위치 옵션 수정 - 성공")
     @Test

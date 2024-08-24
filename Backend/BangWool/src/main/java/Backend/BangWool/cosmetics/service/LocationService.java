@@ -112,7 +112,7 @@ public class LocationService {
 
     private void validateLocationName(String name) {
         if (name.isEmpty() || name.length() > 10) {
-            throw new BadRequestException("Location name should be between 1 and 10 characters");
+            throw new BadRequestException("Location option \"" + name + "\" should be between 1 and 10 characters");
         }
     }
 
@@ -122,12 +122,13 @@ public class LocationService {
     }
 
     private void updateLocationNames(List<LocationEntity> locationOptions, Map<String, String> updateOptions) {
-        locationOptions.stream()
-                .filter(location -> updateOptions.containsKey(location.getName()))
-                .forEach(location -> {
-                    String newName = updateOptions.get(location.getName());
-                    location.setName(newName);
-                });
+        for (LocationEntity locationEntity: locationOptions) {
+            if (updateOptions.containsKey(locationEntity.getName())) {
+                String newName = updateOptions.get(locationEntity.getName());
+                validateLocationName(newName);
+                locationEntity.setName(newName);
+            }
+        }
     }
 
 }
