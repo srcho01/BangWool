@@ -7,8 +7,6 @@ import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
 import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
 import Backend.BangWool.cosmetics.repository.CosmeticsRepository;
 import Backend.BangWool.cosmetics.repository.LocationRepository;
-import Backend.BangWool.cosmetics.service.CosmeticsService;
-import Backend.BangWool.cosmetics.service.LocationService;
 import Backend.BangWool.image.service.S3ImageService;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.Session;
@@ -38,7 +36,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -51,8 +50,6 @@ public class CosmeticsIntegrationTest {
     @Autowired private MockMvc mvc;
     @Autowired private ObjectMapper objectMapper;
 
-    @Autowired private LocationService locationService;
-    @Autowired private CosmeticsService cosmeticsService;
     @MockBean private S3ImageService s3ImageService;
 
     @Autowired private MemberRepository memberRepository;
@@ -188,7 +185,7 @@ public class CosmeticsIntegrationTest {
         );
 
         // mocking
-        when(s3ImageService.upload(image, "cosmetics" + String.valueOf(session.getId()), 512, false)).thenReturn(URI.create("test.uri"));
+        when(s3ImageService.upload(image, "cosmetics" + session.getId(), 512, false)).thenReturn(URI.create("test.uri"));
 
         // when
         mvc.perform(multipart("/cosmetics/create")
