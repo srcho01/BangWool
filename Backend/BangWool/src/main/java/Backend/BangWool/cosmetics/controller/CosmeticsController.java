@@ -10,11 +10,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.Map;
 
 @Tag(name="Cosmetics", description = "화장품 관련 API")
 @RestController
@@ -40,6 +40,20 @@ public class CosmeticsController {
 
         CosmeticsInfoResponse response = cosmeticsService.create(session, request, image);
         return DataResponse.of(response);
+    }
+
+    @Operation(summary = "화장품 상태별 조회", description = "key : 0(사용 전), 1(사용 중), 2(사용 완료) 3가지. value : 해당 상태의 화장품 list")
+    @GetMapping(value = "read/status")
+    public DataResponse<Map<Integer, List<CosmeticsInfoResponse>>> readByStatus(@CurrentSession Session session) {
+        Map<Integer, List<CosmeticsInfoResponse>> read = cosmeticsService.readByStatus(session);
+        return DataResponse.of(read);
+    }
+
+    @Operation(summary = "화장품 위치별 조회", description = "key : 위치 이름. value : 해당 위치의 화장품 list")
+    @GetMapping(value = "read/location")
+    public DataResponse<Map<String, List<CosmeticsInfoResponse>>> readByLocation(@CurrentSession Session session) {
+        Map<String, List<CosmeticsInfoResponse>> read = cosmeticsService.readByLocation(session);
+        return DataResponse.of(read);
     }
 
 }
