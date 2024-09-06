@@ -4,6 +4,7 @@ import Backend.BangWool.cosmetics.domain.Category;
 import Backend.BangWool.cosmetics.domain.CosmeticsEntity;
 import Backend.BangWool.cosmetics.domain.LocationEntity;
 import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
+import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
 import Backend.BangWool.cosmetics.repository.CosmeticsRepository;
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.image.service.S3ImageService;
@@ -24,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -160,6 +162,163 @@ class CosmeticsServiceTest {
         member.addCosmetics(cosmetics);
         member.addLocation(location);
         verify(memberRepository, times(1)).save(member);
+    }
+
+
+    @DisplayName("화장품 상태별 읽기 - 성공 : 화장품 없음")
+    @Test
+    void readByStatusSuccess1() {
+        // mocking
+        when(memberRepository.findById(this.session.getId())).thenReturn(Optional.of(this.member));
+
+        // when
+        Map<Integer, List<CosmeticsInfoResponse>> result = cosmeticsService.readByStatus(this.session);
+
+        // then
+        Map<Integer, List<CosmeticsInfoResponse>> expected = new HashMap<>();
+        for (int i = 0; i < 3; i++) {
+            expected.put(i, new ArrayList<>());
+        }
+        assertThat(result).isEqualTo(expected);
+
+    }
+
+    @DisplayName("화장품 상태별 읽기 - 성공 : 화장품 있음")
+    @Test
+    void readByStatusSuccess2() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics1 = CosmeticsEntity.builder()
+                .name("화장품1")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        CosmeticsEntity cosmetics2 = CosmeticsEntity.builder()
+                .name("화장품2")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        CosmeticsEntity cosmetics3 = CosmeticsEntity.builder()
+                .name("화장품3")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        cosmetics3.setStatus(2);
+
+        this.member.addCosmetics(cosmetics1);
+        this.member.addCosmetics(cosmetics2);
+        this.member.addCosmetics(cosmetics3);
+
+        // mocking
+        when(memberRepository.findById(this.session.getId())).thenReturn(Optional.of(this.member));
+
+        // when
+        Map<Integer, List<CosmeticsInfoResponse>> result = cosmeticsService.readByStatus(session);
+
+        // then
+        Map<Integer, List<CosmeticsInfoResponse>> expected = new HashMap<>();
+        for (int i = 0; i < 3; i++) {
+            expected.put(i, new ArrayList<>());
+        }
+        expected.get(0).add(setCosmeticsInfoResponse(this.member, cosmetics1));
+        expected.get(0).add(setCosmeticsInfoResponse(this.member, cosmetics2));
+        expected.get(2).add(setCosmeticsInfoResponse(this.member, cosmetics3));
+
+        assertThat(result).isEqualTo(expected);
+    }
+
+
+    @DisplayName("화장품 위치별 읽기 - 성공 : 화장품 없음")
+    @Test
+    void readByLocationSuccess1() {
+        // mocking
+        when(memberRepository.findById(this.session.getId())).thenReturn(Optional.of(this.member));
+
+        // when
+        Map<String, List<CosmeticsInfoResponse>> result = cosmeticsService.readByLocation(this.session);
+
+        // then
+        Map<Integer, List<CosmeticsInfoResponse>> expected = new HashMap<>();
+        assertThat(result).isEqualTo(expected);
+    }
+
+    @DisplayName("화장품 위치별 읽기 - 성공 : 화장품 있음")
+    @Test
+    void readByLocationSuccess2() {
+        // given
+        LocationEntity location1 = LocationEntity.builder()
+                .name("location1")
+                .build();
+        LocationEntity location2 = LocationEntity.builder()
+                .name("location2")
+                .build();
+        LocationEntity location3 = LocationEntity.builder()
+                .name("location3")
+                .build();
+        this.member.addLocation(location1);
+        this.member.addLocation(location2);
+        this.member.addLocation(location3);
+
+        CosmeticsEntity cosmetics1 = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location1)
+                .build();
+        CosmeticsEntity cosmetics2 = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location2)
+                .build();
+        CosmeticsEntity cosmetics3 = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location3)
+                .build();
+        this.member.addCosmetics(cosmetics1);
+        this.member.addCosmetics(cosmetics2);
+        this.member.addCosmetics(cosmetics3);
+        this.member.addCosmetics(cosmetics3);
+
+        // mocking
+        when(memberRepository.findById(this.session.getId())).thenReturn(Optional.of(this.member));
+
+        // when
+        Map<String, List<CosmeticsInfoResponse>> result = cosmeticsService.readByLocation(session);
+
+        // then
+        Map<String, List<CosmeticsInfoResponse>> expected = new HashMap<>();
+        expected.put("location1", Arrays.asList(setCosmeticsInfoResponse(this.member, cosmetics1)));
+        expected.put("location2", Arrays.asList(setCosmeticsInfoResponse(this.member, cosmetics2)));
+        expected.put("location3", Arrays.asList(setCosmeticsInfoResponse(this.member, cosmetics3), setCosmeticsInfoResponse(this.member, cosmetics3)));
+
+        assertThat(result).isEqualTo(expected);
+        assertThat(result.get("location3").size()).isEqualTo(2);
+    }
+
+
+    private CosmeticsInfoResponse setCosmeticsInfoResponse(MemberEntity member, CosmeticsEntity cosmetics) {
+        return CosmeticsInfoResponse.builder()
+                .id(cosmetics.getId())
+                .memberId(member.getId())
+                .memberEmail(member.getEmail())
+                .name(cosmetics.getName())
+                .category(cosmetics.getCategory())
+                .expirationDate(cosmetics.getExpirationDate())
+                .startDate(cosmetics.getStartDate())
+                .status(cosmetics.getStatus())
+                .locationName(cosmetics.getLocation().getName())
+                .image(cosmetics.getImage())
+                .build();
     }
 
 }
