@@ -2,6 +2,7 @@ package Backend.BangWool.image.service;
 
 import Backend.BangWool.exception.BadRequestException;
 import Backend.BangWool.exception.ServerException;
+import Backend.BangWool.util.CONSTANT;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
@@ -21,10 +22,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +50,18 @@ public class S3ImageService {
     }
 
     public void delete(URI uri) {
+        List<URI> defaultURI = List.of(
+                CONSTANT.DEFAULT_PROFILE,
+                CONSTANT.DEFAULT_COS_BASIC,
+                CONSTANT.DEFAULT_COS_BASE,
+                CONSTANT.DEFAULT_COS_COLOR,
+                CONSTANT.DEFAULT_COS_OTHERS
+        );
+
+        if (defaultURI.contains(uri)) {
+            return;
+        }
+
         String key = getKeyFromUrl(uri);
         try {
             amazonS3.deleteObject(new DeleteObjectRequest(bucketName, key));
