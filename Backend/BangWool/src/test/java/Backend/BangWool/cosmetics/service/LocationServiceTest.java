@@ -192,7 +192,7 @@ class LocationServiceTest {
         String option = "test";
         LocationEntity location = LocationEntity.builder().name(option).build();
         CosmeticsEntity cosmetics = CosmeticsEntity.builder()
-                .name(option)
+                .name("name")
                 .expirationDate(LocalDate.of(2000, 1, 1))
                 .category(Category.base)
                 .location(location)

@@ -96,7 +96,7 @@ public class LocationService {
 
         // cosmetics의 참조가 남아있다면 삭제 불가
         for (CosmeticsEntity cosmetics: member.getCosmetics()) {
-            if (updateOptionName.equals(cosmetics.getName())) {
+            if (updateOptionName.equals(cosmetics.getLocation().getName())) {
                 return false;
             }
         }
