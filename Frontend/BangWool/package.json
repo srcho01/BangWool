@@ -10,8 +10,13 @@
     "test": "jest"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "^2.0.0",
+    "@react-native-firebase/app": "^20.4.0",
+    "@react-native-firebase/auth": "^20.4.0",
+    "@react-native-google-signin/google-signin": "^13.0.1",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/stack": "^6.4.0",
+    "firebase": "^10.13.1",
     "react": "18.2.0",
     "react-native": "0.74.3",
     "react-native-dotenv": "^3.4.11",
