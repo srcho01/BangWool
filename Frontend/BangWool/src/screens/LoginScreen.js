@@ -3,6 +3,8 @@ import { View, Text, TextInput, StyleSheet, ImageBackground, TouchableOpacity, A
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { serverUrl } from '@env';
 import styles from './styles/LoginStyle';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -33,7 +35,7 @@ const LoginScreen = ({ navigation }) => {
   
       let errorDetails = '';
       if (!response.ok) {
-        errorDetails = await response.text(); // Attempt to read error details
+        errorDetails = await response.text(); 
         console.error(`Login failed. Status: ${response.status}, Details: ${errorDetails}`);
   
         if (response.status === 401) {
@@ -49,16 +51,19 @@ const LoginScreen = ({ navigation }) => {
       const data = await response.json();
       console.log('Login successful:', data);
   
-      // Save tokens and navigate
-      // await AsyncStorage.setItem('accessToken', data.data.accessToken);
-      // await AsyncStorage.setItem('refreshToken', data.data.refreshToken);
-      // navigation.navigate('Home');
+      // Access Token 및 Refresh Token 저장
+      await AsyncStorage.setItem('accessToken', data.data.accessToken);
+      await AsyncStorage.setItem('refreshToken', data.data.refreshToken);
+  
+      // 홈 화면으로 이동
+      navigation.navigate('Home');
   
     } catch (error) {
       console.error('Error during login:', error.message);
       Alert.alert('Login Error', 'An unexpected error occurred');
     }
   };
+  
   
 
   const toggleCheckbox = () => {

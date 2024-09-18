@@ -204,45 +204,48 @@ const SignupScreen = ({ navigation }) => {
           {isNicknameAvailable === true && <Text style={styles.successText}>닉네임을 사용할 수 있습니다.</Text>}
         </View>
         <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>이메일</Text>
-          <View style={styles.emailContainer}>
-            <TextInput
-              style={[styles.input, { opacity: isCodeSent ? 0.5 : 1 }]}
-              placeholder="ex) user@example.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!isCodeSent}
-            />
-            <TouchableOpacity
-              style={styles.sendButton}
-              onPress={sendVerificationCode}
-              disabled={isCodeSent}
-            >
-              <Text style={styles.checkButtonText}>인증번호 보내기</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-        {isCodeSent && (
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>인증번호</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="인증번호 입력"
-              value={verificationCode}
-              onChangeText={setVerificationCode}
-              autoCapitalize="none"
-            />
-            <TouchableOpacity
-              style={styles.verifyButton}
-              onPress={verifyEmailCode}
-              disabled={isEmailVerified}
-            >
-              <Text style={styles.verifyButtonText}>인증</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+  <Text style={styles.inputLabel}>이메일</Text>
+  <View style={styles.rowContainer}> 
+    <TextInput
+      style={[styles.input, styles.emailInput, { opacity: isCodeSent ? 0.5 : 1 }]}
+      placeholder="ex) user@example.com"
+      value={email}
+      onChangeText={setEmail}
+      keyboardType="email-address"
+      autoCapitalize="none"
+      editable={!isCodeSent}
+    />
+    <TouchableOpacity
+      style={styles.smallButton}
+      onPress={sendVerificationCode}
+      disabled={isCodeSent}
+    >
+      <Text style={styles.smallButtonText}>인증번호</Text>
+    </TouchableOpacity>
+  </View>
+</View>
+
+{isCodeSent && (
+  <View style={styles.inputContainer}>
+    <Text style={styles.inputLabel}>인증번호</Text>
+    <View style={styles.rowContainer}> 
+      <TextInput
+        style={[styles.input, styles.codeInput]} 
+        placeholder="인증번호 입력"
+        value={verificationCode}
+        onChangeText={setVerificationCode}
+        autoCapitalize="none"
+      />
+      <TouchableOpacity
+        style={styles.smallButton}
+        onPress={verifyEmailCode}
+        disabled={isEmailVerified}
+      >
+        <Text style={styles.smallButtonText}>인증</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>생년월일 (YYYYMMDD)</Text>
           <TextInput
