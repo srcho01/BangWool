@@ -5,6 +5,7 @@ import Backend.BangWool.cosmetics.domain.CosmeticsEntity;
 import Backend.BangWool.cosmetics.domain.LocationEntity;
 import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
 import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
+import Backend.BangWool.cosmetics.dto.CosmeticsUpdateRequest;
 import Backend.BangWool.cosmetics.repository.CosmeticsRepository;
 import Backend.BangWool.cosmetics.repository.LocationRepository;
 import Backend.BangWool.image.service.S3ImageService;
@@ -12,6 +13,7 @@ import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.member.repository.MemberRepository;
 import Backend.BangWool.response.DataResponse;
+import Backend.BangWool.util.CONSTANT;
 import Backend.BangWool.util.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -35,6 +37,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -337,6 +340,81 @@ public class CosmeticsIntegrationTest {
                 .andExpect(content().json(responseJson));
     }
 
+
+    @DisplayName("화장품 수정 : 성공 - 이미지 삭제")
+    @Test
+    void updateSuccess() throws Exception {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        locationRepository.save(location);
+        cosmeticsRepository.save(cosmetics);
+        memberRepository.save(member);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(this.member.getCosmetics().getFirst().getId())
+                .name("newName")
+                .category("color")
+                .location("newLoc")
+                .imageStatus("DELETE")
+                .build();
+        MockMultipartFile partRequest = new MockMultipartFile(
+                "data",
+                "",
+                "application/json",
+                objectMapper.writeValueAsBytes(request)
+        );
+
+        CosmeticsInfoResponse response = CosmeticsInfoResponse.builder()
+                .id(cosmetics.getId())
+                .memberId(this.member.getId())
+                .memberEmail(this.member.getEmail())
+                .name("newName")
+                .category(Category.color)
+                .expirationDate(cosmetics.getExpirationDate())
+                .startDate(cosmetics.getStartDate())
+                .status(cosmetics.getStatus())
+                .locationName("newLoc")
+                .image(CONSTANT.DEFAULT_COS_COLOR)
+                .build();
+        String responseJson = objectMapper.writeValueAsString(DataResponse.of(response));
+
+
+        // mocking
+        doNothing().when(s3ImageService).delete(CONSTANT.DEFAULT_COS_BASIC);
+
+        // when & then
+
+        mvc.perform(multipart("/cosmetics/update")
+                        .file(partRequest)
+                        .header("Authorization", "Bearer " + this.jwt)
+                        .contentType(MediaType.MULTIPART_FORM_DATA))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+
+        // then
+        MemberEntity memberResult = memberRepository.findById(session.getId()).orElseThrow();
+        LocationEntity locationResult = memberResult.getLocationOptions().getFirst();
+        CosmeticsEntity cosmeticsResult = memberResult.getCosmetics().getFirst();
+
+        assertThat(memberResult.getLocationOptions().size()).isEqualTo(1);
+        assertThat(locationResult.getName()).isEqualTo("newLoc");
+
+        assertThat(cosmeticsResult.getName()).isEqualTo("newName");
+        assertThat(cosmeticsResult.getCategory()).isEqualTo(Category.color);
+        assertThat(cosmeticsResult.getImage()).isEqualTo(CONSTANT.DEFAULT_COS_COLOR);
+    }
 
 
     private CosmeticsInfoResponse setCosmeticsInfoResponse(MemberEntity member, CosmeticsEntity cosmetics) {

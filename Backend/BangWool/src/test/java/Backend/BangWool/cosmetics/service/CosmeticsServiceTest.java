@@ -5,8 +5,10 @@ import Backend.BangWool.cosmetics.domain.CosmeticsEntity;
 import Backend.BangWool.cosmetics.domain.LocationEntity;
 import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
 import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
+import Backend.BangWool.cosmetics.dto.CosmeticsUpdateRequest;
 import Backend.BangWool.cosmetics.repository.CosmeticsRepository;
 import Backend.BangWool.exception.BadRequestException;
+import Backend.BangWool.exception.NotFoundException;
 import Backend.BangWool.image.service.S3ImageService;
 import Backend.BangWool.member.domain.MemberEntity;
 import Backend.BangWool.member.dto.Session;
@@ -22,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -303,6 +306,242 @@ class CosmeticsServiceTest {
 
         assertThat(result).isEqualTo(expected);
         assertThat(result.get("location3").size()).isEqualTo(2);
+    }
+
+
+    @DisplayName("화장품 수정 - 오류 : 없는 화장품")
+    @Test
+    void updateFail1() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .name("화장품")
+                .category("basic")
+                .build();
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.empty());
+
+        // when & then
+        NotFoundException e = assertThrows(NotFoundException.class, () -> cosmeticsService.update(this.session, request, null));
+        assertThat(e.getMessage()).isEqualTo("Cosmetics not found");
+    }
+
+    @DisplayName("화장품 수정 - 오류 : 이미지 업데이트 시 이미지 없음")
+    @Test
+    void updateFail2() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .name("화장품")
+                .category("basic")
+                .imageStatus("UPDATE")
+                .build();
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.ofNullable(cosmetics));
+
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> cosmeticsService.update(this.session, request, null));
+        assertThat(e.getMessage()).isEqualTo("If you want to update the image, an image file is needed");
+    }
+
+    @DisplayName("화장품 수정 - 오류 : 존재하지 않는 카테고리")
+    @Test
+    void updateFail3() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .name("화장품")
+                .category("none")
+                .build();
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.ofNullable(cosmetics));
+
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> cosmeticsService.update(this.session, request, null));
+        assertThat(e.getMessage()).isEqualTo("Invalid category - none");
+    }
+
+    @DisplayName("화장품 수정 - 오류 : 잘못된 이미지 status")
+    @Test
+    void updateFail4() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("화장품")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .name("화장품")
+                .category("basic")
+                .imageStatus("wrongImageStatus")
+                .build();
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.ofNullable(cosmetics));
+
+        // when & then
+        BadRequestException e = assertThrows(BadRequestException.class, () -> cosmeticsService.update(this.session, request, null));
+        assertThat(e.getMessage()).isEqualTo("Wrong image status : wrongImageStatus");
+    }
+
+    @DisplayName("화장품 수정 - 성공 : 이미지 삭제")
+    @Test
+    void updateSuccess1() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        LocationEntity newLocation = LocationEntity.builder()
+                .name("newLocation")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("name")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .name("newName")
+                .category("color")
+                .location("newLocation")
+                .imageStatus("DELETE")
+                .build();
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.ofNullable(cosmetics));
+        doNothing().when(s3ImageService).delete(cosmetics.getImage());
+        when(locationService.create(this.session, "newLocation")).thenReturn(newLocation);
+        when(locationService.delete(this.session,"location")).thenReturn(true);
+
+        // when
+        CosmeticsInfoResponse response = cosmeticsService.update(this.session, request, null);
+
+        // then
+        CosmeticsInfoResponse expected = CosmeticsInfoResponse.builder()
+                .id(null)
+                .memberId(this.member.getId())
+                .memberEmail(this.member.getEmail())
+                .name("newName")
+                .category(Category.color)
+                .expirationDate(cosmetics.getExpirationDate())
+                .startDate(cosmetics.getStartDate())
+                .status(cosmetics.getStatus())
+                .locationName("newLocation")
+                .image(CONSTANT.DEFAULT_COS_COLOR)
+                .build();
+
+        assertThat(response).isEqualTo(expected);
+    }
+
+    @DisplayName("화장품 수정 - 성공 : 이미지 업데이트")
+    @Test
+    void updateSuccess2() {
+        // given
+        LocationEntity location = LocationEntity.builder()
+                .name("location")
+                .build();
+        this.member.addLocation(location);
+
+        CosmeticsEntity cosmetics = CosmeticsEntity.builder()
+                .name("name")
+                .expirationDate(LocalDate.of(2000, 1, 1))
+                .category(Category.valueOf("basic"))
+                .location(location)
+                .build();
+        this.member.addCosmetics(cosmetics);
+
+        CosmeticsUpdateRequest request = CosmeticsUpdateRequest.builder()
+                .id(23405L)
+                .imageStatus("UPDATE")
+                .build();
+
+        MultipartFile mockImage = mock(MultipartFile.class);
+
+        // mocking
+        when(memberRepository.findById(1L)).thenReturn(Optional.of(this.member));
+        when(cosmeticsRepository.findByMemberAndId(this.member, 23405L)).thenReturn(Optional.ofNullable(cosmetics));
+        when(s3ImageService.upload(mockImage, "cosmetics1", 512, false)).thenReturn(URI.create("https://cosmetics1.com"));
+        doNothing().when(s3ImageService).delete(cosmetics.getImage());
+
+        // when
+        CosmeticsInfoResponse response = cosmeticsService.update(this.session, request, mockImage);
+
+        // then
+        CosmeticsInfoResponse expected = CosmeticsInfoResponse.builder()
+                .id(null)
+                .memberId(this.member.getId())
+                .memberEmail(this.member.getEmail())
+                .name(cosmetics.getName())
+                .category(cosmetics.getCategory())
+                .expirationDate(cosmetics.getExpirationDate())
+                .startDate(cosmetics.getStartDate())
+                .status(cosmetics.getStatus())
+                .locationName(cosmetics.getLocation().getName())
+                .image(URI.create("https://cosmetics1.com"))
+                .build();
+
+        assertThat(response).isEqualTo(expected);
     }
 
 
