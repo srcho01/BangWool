@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface CosmeticsRepository extends JpaRepository<CosmeticsEntity, Long> {
     Optional<CosmeticsEntity> findByMemberAndName(MemberEntity member, String name);
+    Optional<CosmeticsEntity> findByMemberAndId(MemberEntity member, Long id);
 }

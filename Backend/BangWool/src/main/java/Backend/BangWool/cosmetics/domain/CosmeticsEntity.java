@@ -63,7 +63,7 @@ public class CosmeticsEntity {
         this.status = 0;
     }
 
-    private static URI getDefaultImage(Category category) {
+    public static URI getDefaultImage(Category category) {
         return switch (category) {
             case basic -> CONSTANT.DEFAULT_COS_BASIC;
             case base -> CONSTANT.DEFAULT_COS_BASE;
