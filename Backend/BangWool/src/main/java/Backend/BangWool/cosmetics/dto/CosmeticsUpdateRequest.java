@@ -27,7 +27,7 @@ public class CosmeticsUpdateRequest {
     @Schema(example = "화장대 위", nullable = true, description = "10자 이내")
     private String location;
 
-    @Schema(example = "KEEP", nullable = true, description = "UPDATE, DELETE, null 중 하나")
+    @Schema(example = "UPDATE", nullable = true, description = "UPDATE, DELETE, null 중 하나")
     private String imageStatus;
 
 }
