@@ -2,6 +2,7 @@ package Backend.BangWool.cosmetics.controller;
 
 import Backend.BangWool.cosmetics.dto.CosmeticsCreateRequest;
 import Backend.BangWool.cosmetics.dto.CosmeticsInfoResponse;
+import Backend.BangWool.cosmetics.dto.CosmeticsUpdateRequest;
 import Backend.BangWool.cosmetics.service.CosmeticsService;
 import Backend.BangWool.member.dto.Session;
 import Backend.BangWool.response.DataResponse;
@@ -54,6 +55,21 @@ public class CosmeticsController {
     public DataResponse<Map<String, List<CosmeticsInfoResponse>>> readByLocation(@CurrentSession Session session) {
         Map<String, List<CosmeticsInfoResponse>> read = cosmeticsService.readByLocation(session);
         return DataResponse.of(read);
+    }
+
+    @Operation(summary = "화장품 수정", description = """
+            ※ Swagger Try it out 불가, Postman 가능 ※ <br><br>
+            data(required)의 Content-type : application/json <br>
+            image(not required)의 Content-type : multipart/form-data <br><br>
+            data와 image 각각 Content-type 지정하여 전송 <br><br><br>
+            사진, 이름, 위치, 카테고리 변경 가능
+            """)
+    @PostMapping(value = "update")
+    public DataResponse<CosmeticsInfoResponse> update(@CurrentSession @Valid Session session,
+                       @RequestPart(value = "data") CosmeticsUpdateRequest request,
+                       @RequestPart(value = "image", required = false) MultipartFile image) {
+        CosmeticsInfoResponse response = cosmeticsService.update(session, request, image);
+        return DataResponse.of(response);
     }
 
 }
