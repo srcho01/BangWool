@@ -1,0 +1,21 @@
+[debug] [2024-09-05T04:53:38.475Z] ----------------------------------------------------------------------
+[debug] [2024-09-05T04:53:38.482Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\happy\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2024-09-05T04:53:38.483Z] CLI Version:   13.16.0
+[debug] [2024-09-05T04:53:38.484Z] Platform:      win32
+[debug] [2024-09-05T04:53:38.484Z] Node Version:  v20.15.0
+[debug] [2024-09-05T04:53:38.484Z] Time:          Thu Sep 05 2024 13:53:38 GMT+0900 (대한민국 표준시)
+[debug] [2024-09-05T04:53:38.485Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-09-05T04:53:38.506Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-09-05T04:53:38.507Z] > authorizing via signed-in user (gyur2@kookmin.ac.kr)
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  D:\BangWool\Frontend\BangWool
+
